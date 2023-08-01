@@ -39,7 +39,7 @@ abstract contract Users is Test, Config {
     uint256 amount = 1000 ether;
     token.mint(user, amount);
     vm.startPrank(user);
-    token.approve(address(superToken), MAX_INT);
+    token.approve(address(superToken), type(uint256).max);
     superToken.upgrade(amount);
     vm.stopPrank();
     console.log(user, " ", superToken.balanceOf(user));

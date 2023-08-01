@@ -31,8 +31,6 @@ abstract contract Config {
   DataTypes.PoolInfo poolInfo;
   PoolV1 poolProxy;
 
-  uint256 MAX_INT = 2 ** 256 - 1;
-
   UUPSProxy strategyProxy;
 
   address public constant ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

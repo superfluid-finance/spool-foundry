@@ -42,8 +42,6 @@ contract PoolStateV1 {
 
   //// PARAMETERS
 
-  uint256 constant MAX_INT = 2 ** 256 - 1;
-
   uint256 constant PRECISSION = 1_000_000;
 
   uint256 constant SUPERFLUID_DEPOSIT = 4 * 3600;
