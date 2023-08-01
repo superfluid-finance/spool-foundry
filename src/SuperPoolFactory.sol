@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "forge-std/console.sol";
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { ISuperfluid, ISuperToken, ISuperApp, SuperAppDefinitions } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
@@ -24,11 +23,8 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
   Counters.Counter public pools;
 
   ISuperfluid host;
-
   IOps ops;
-
   address owner;
-
   address poolImpl;
   address poolInternalImpl;
 
@@ -44,6 +40,7 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
    * @notice initializer of the Pool
    */
   function initialize(DataTypes.SuperPoolFactoryInitializer memory factoryInitializer) external initializer {
+    
     host = factoryInitializer.host;
     ops = factoryInitializer.ops;
     poolImpl = factoryInitializer.poolImpl;
@@ -72,9 +69,6 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
 
     UUPSProxy poolProxy = new UUPSProxy();
     poolProxy.initializeProxy(poolImpl);
-
-    // UUPSProxy poolInternalProxy = new UUPSProxy();
-    // poolInternalProxy.initializeProxy(poolInternalImpl);
 
     /////// Initializer Pool
     DataTypes.PoolInitializer memory poolInit;
