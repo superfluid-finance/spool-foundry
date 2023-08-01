@@ -37,6 +37,15 @@ PoolFactory (create a pool passing superToken and strategy)
 [PoolFactory](https://goerli.etherscan.io/address/0xE8e2A6DBE6Cc0A746855Acff8ceEDfbf18FC8499)
 
 
+## Testing
+
+To run the tests, you need to run it on forked goerli, use this command:
+```
+forge test --fork-url <RPC_URL> --fork-block-number 7850256 -vv
+```
+
+> NOTE: You MUST use block 7850256.
+
 ###  Super Pool Factory
 
 The contract is responsible for creating the pools, it creates proxies of the pool and pool internal implementation and initializes them. 

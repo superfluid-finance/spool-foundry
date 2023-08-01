@@ -88,28 +88,28 @@ abstract contract DecodeFile is Test, Config, Users, Gelato {
   function readFilePool(string memory path) internal view returns (HelpTypes.ePool memory ePool) {
     string memory result = vm.readFile(path);
 
-    ePool.id = st2num(abi.decode(vm.parseJson(result, "id"), (string)));
-    ePool.timestamp = st2num(abi.decode(vm.parseJson(result, "timestamp"), (string)));
+    ePool.id = st2num(abi.decode(vm.parseJson(result, ".id"), (string)));
+    ePool.timestamp = st2num(abi.decode(vm.parseJson(result, ".timestamp"), (string)));
 
-    ePool.poolTotalBalance = st2num(abi.decode(vm.parseJson(result, "poolTotalBalance"), (string)));
-    ePool.poolBalance = st2num(abi.decode(vm.parseJson(result, "poolBalance"), (string)));
-    ePool.aaveBalance = st2num(abi.decode(vm.parseJson(result, "aaveBalance"), (string)));
+    ePool.poolTotalBalance = st2num(abi.decode(vm.parseJson(result, ".poolTotalBalance"), (string)));
+    ePool.poolBalance = st2num(abi.decode(vm.parseJson(result, ".poolBalance"), (string)));
+    ePool.aaveBalance = st2num(abi.decode(vm.parseJson(result, ".aaveBalance"), (string)));
 
-    ePool.protocolYield = st2num(abi.decode(vm.parseJson(result, "protocolYield"), (string)));
-    ePool.deposit = st2num(abi.decode(vm.parseJson(result, "deposit"), (string)));
-    ePool.depositFromInFlowRate = st2num(abi.decode(vm.parseJson(result, "depositFromInFlowRate"), (string)));
-    ePool.depositFromOutFlowRate = st2num(abi.decode(vm.parseJson(result, "depositFromOutFlowRate"), (string)));
-    ePool.inFlowRate = int96(uint96(st2num(abi.decode(vm.parseJson(result, "inFlowRate "), (string)))));
-    ePool.outFlowRate = int96(uint96(st2num(abi.decode(vm.parseJson(result, "outFlowRate"), (string)))));
-    ePool.outFlowBuffer = st2num(abi.decode(vm.parseJson(result, "outFlowBuffer"), (string)));
+    ePool.protocolYield = st2num(abi.decode(vm.parseJson(result, ".protocolYield"), (string)));
+    ePool.deposit = st2num(abi.decode(vm.parseJson(result, ".deposit"), (string)));
+    ePool.depositFromInFlowRate = st2num(abi.decode(vm.parseJson(result, ".depositFromInFlowRate"), (string)));
+    ePool.depositFromOutFlowRate = st2num(abi.decode(vm.parseJson(result, ".depositFromOutFlowRate"), (string)));
+    ePool.inFlowRate = int96(uint96(st2num(abi.decode(vm.parseJson(result, ".inFlowRate "), (string)))));
+    ePool.outFlowRate = int96(uint96(st2num(abi.decode(vm.parseJson(result, ".outFlowRate"), (string)))));
+    ePool.outFlowBuffer = st2num(abi.decode(vm.parseJson(result, ".outFlowBuffer"), (string)));
 
-    ePool.yieldTokenIndex = st2num(abi.decode(vm.parseJson(result, "yieldTokenIndex"), (string)));
-    ePool.yieldInFlowRateIndex = st2num(abi.decode(vm.parseJson(result, "yieldInFlowRateIndex"), (string)));
-    ePool.yieldOutFlowRateIndex = st2num(abi.decode(vm.parseJson(result, "yieldOutFlowRateIndex"), (string)));
+    ePool.yieldTokenIndex = st2num(abi.decode(vm.parseJson(result, ".yieldTokenIndex"), (string)));
+    ePool.yieldInFlowRateIndex = st2num(abi.decode(vm.parseJson(result, ".yieldInFlowRateIndex"), (string)));
+    ePool.yieldOutFlowRateIndex = st2num(abi.decode(vm.parseJson(result, ".yieldOutFlowRateIndex"), (string)));
 
-    ePool.yieldAccrued = st2num(abi.decode(vm.parseJson(result, "yieldAccrued"), (string)));
-    ePool.yieldSnapshot = st2num(abi.decode(vm.parseJson(result, "yieldSnapshot"), (string)));
-    ePool.totalYield = st2num(abi.decode(vm.parseJson(result, "totalYield"), (string)));
+    ePool.yieldAccrued = st2num(abi.decode(vm.parseJson(result, ".yieldAccrued"), (string)));
+    ePool.yieldSnapshot = st2num(abi.decode(vm.parseJson(result, ".yieldSnapshot"), (string)));
+    ePool.totalYield = st2num(abi.decode(vm.parseJson(result, ".totalYield"), (string)));
   }
 
   // User
@@ -150,24 +150,24 @@ abstract contract DecodeFile is Test, Config, Users, Gelato {
   function readFileUser(string memory path) internal view returns (HelpTypes.eUser memory eUser) {
     string memory result = vm.readFile(path);
 
-    eUser.id = st2num(abi.decode(vm.parseJson(result, "id"), (string)));
-    eUser.realTimeBalance = st2num(abi.decode(vm.parseJson(result, "realTimeBalance"), (string)));
-    eUser.tokenBalance = st2num(abi.decode(vm.parseJson(result, "tokenBalance"), (string)));
+    eUser.id = st2num(abi.decode(vm.parseJson(result, ".id"), (string)));
+    eUser.realTimeBalance = st2num(abi.decode(vm.parseJson(result, ".realTimeBalance"), (string)));
+    eUser.tokenBalance = st2num(abi.decode(vm.parseJson(result, ".tokenBalance"), (string)));
 
-    eUser.deposit = st2num(abi.decode(vm.parseJson(result, "deposit"), (string)));
+    eUser.deposit = st2num(abi.decode(vm.parseJson(result, ".deposit"), (string)));
 
-    eUser.inFlowDeposit = st2num(abi.decode(vm.parseJson(result, "inFlowDeposit"), (string)));
-    eUser.inFlow = int96(uint96(st2num(abi.decode(vm.parseJson(result, "inFlow "), (string)))));
+    eUser.inFlowDeposit = st2num(abi.decode(vm.parseJson(result, ".inFlowDeposit"), (string)));
+    eUser.inFlow = int96(uint96(st2num(abi.decode(vm.parseJson(result, ".inFlow "), (string)))));
 
-    eUser.outFlow = int96(uint96(st2num(abi.decode(vm.parseJson(result, "outFlow"), (string)))));
-    eUser.outStepTime = st2num(abi.decode(vm.parseJson(result, "outStepTime"), (string)));
-    eUser.outStreamCreated = st2num(abi.decode(vm.parseJson(result, "outStreamCreated"), (string)));
-    eUser.outStreamInit = st2num(abi.decode(vm.parseJson(result, "outStreamInit"), (string)));
-    eUser.outMinBalance = st2num(abi.decode(vm.parseJson(result, "outMinBalance"), (string)));
+    eUser.outFlow = int96(uint96(st2num(abi.decode(vm.parseJson(result, ".outFlow"), (string)))));
+    eUser.outStepTime = st2num(abi.decode(vm.parseJson(result, ".outStepTime"), (string)));
+    eUser.outStreamCreated = st2num(abi.decode(vm.parseJson(result, ".outStreamCreated"), (string)));
+    eUser.outStreamInit = st2num(abi.decode(vm.parseJson(result, ".outStreamInit"), (string)));
+    eUser.outMinBalance = st2num(abi.decode(vm.parseJson(result, ".outMinBalance"), (string)));
 
-    eUser.nextExecOut = st2num(abi.decode(vm.parseJson(result, "nextExecOut"), (string)));
-    eUser.outStreamId = abi.decode(vm.parseJson(result, "outStreamId"), (bytes32));
-    eUser.outStreamInit = st2num(abi.decode(vm.parseJson(result, "outStreamInit"), (string)));
+    eUser.nextExecOut = st2num(abi.decode(vm.parseJson(result, ".nextExecOut"), (string)));
+    eUser.outStreamId = abi.decode(vm.parseJson(result, ".outStreamId"), (bytes32));
+    eUser.outStreamInit = st2num(abi.decode(vm.parseJson(result, ".outStreamInit"), (string)));
   }
 
   // helpers
