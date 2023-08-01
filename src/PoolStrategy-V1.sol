@@ -22,7 +22,6 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
  *
  */
 contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
-
   address owner;
 
   ISuperToken superToken;
@@ -36,8 +35,6 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
   ERC20mintable token; // SUPERFLUID Faketoken
   ERC20mintable aaveToken; // AAVE Fake token
 
-  uint256 MAX_INT;
-
   constructor() { }
 
   function initialize(ISuperToken _superToken, ERC20mintable _token, IPoolV1 _pool, IPool _aavePool, IERC20 _aToken, ERC20mintable _aaveToken) external initializer {
@@ -48,10 +45,9 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
     aavePool = _aavePool;
     aToken = _aToken;
     aaveToken = _aaveToken;
-    MAX_INT = 2 ** 256 - 1;
 
-    aaveToken.approve(address(aavePool), MAX_INT);
-    token.approve(address(superToken), MAX_INT);
+    aaveToken.approve(address(aavePool), type(uint256).max);
+    token.approve(address(superToken), type(uint256).max);
   }
 
   function balanceOf() public view returns (uint256 balance) {
