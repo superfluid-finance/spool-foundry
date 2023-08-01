@@ -1,10 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "forge-std/console.sol";
-
-
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
@@ -13,7 +9,7 @@ import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { SuperTokenV1Library, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import { IConstantFlowAgreementV1 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
-import { ISuperAgreement, ISuperApp } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import { ISuperAgreement } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { SuperAppBase } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 import { OpsReady } from "./gelato/OpsReady.sol";
 import { IOps } from "./gelato/IOps.sol";
@@ -42,7 +38,6 @@ import { Events } from "./libraries/Events.sol";
  *
  */
 contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC777Recipient, IPoolV1, IERC20 {
-  using SafeMath for uint256;
   using SuperTokenV1Library for ISuperToken;
 
   /**
@@ -235,7 +230,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyHost onlyNotEmergency returns (bytes memory newCtx) {
     newCtx = _ctx;
-    console.log("24---GGGGGGGGGGGUUUAUUAUAUAUUA");
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
     //// If In-Stream we will request a pool update - SuperApp is always the receiver, can't self streams
@@ -254,8 +248,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   ) external override returns (bytes memory newCtx) {
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
     newCtx = _ctx;
-
-    console.log("276---GGGGGGGGGGGUUUAUUAUAUAUUA");
 
     //// If In-Stream we will request a pool update
     if (receiver == address(this)) {
@@ -283,7 +275,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyNotEmergency onlyHost returns (bytes memory newCtx) {
     newCtx = _ctx;
-    console.log("305---GGGGGGGGGGGUUUAUUAUAUAUUA");
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
 
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
@@ -431,7 +422,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   // #endregion =========== =============  Modifiers ============= ============= //
 
   receive() external payable {
-    console.log("----- receive:", msg.value);
   }
 
   function withdraw() external onlyOwner returns (bool) {
@@ -447,7 +437,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
   // #region ============ ===============  ERC20 implementation ============= ============= //
   function balanceOf(address _supplier) public view override (IPoolV1, IERC20) returns (uint256 balance) {
-    return IDelegatedPool(address(this))._getSupplierBalance(_supplier).div(PRECISSION);
+    return IDelegatedPool(address(this))._getSupplierBalance(_supplier) / PRECISSION;
   }
 
   function _transfer(address from, address to, uint256 amount) internal {
