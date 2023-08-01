@@ -258,14 +258,11 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     if (receiver == address(this)) {
       newCtx = _updateStreamRecord(newCtx, 0, sender);
       emitEvents(sender);
-      bytes memory payload = abi.encode("");
-      emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_STOP, payload, block.timestamp, sender);
+      emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_STOP, abi.encode(""), block.timestamp, sender);
     } else if (sender == address(this)) {
       callInternal(abi.encodeWithSignature("_redeemFlowStop(address)", receiver));
-
       emitEvents(receiver);
-      bytes memory payload = abi.encode("");
-      emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, payload, block.timestamp, receiver);
+      emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, abi.encode(""), block.timestamp, receiver);
     }
 
     return newCtx;
