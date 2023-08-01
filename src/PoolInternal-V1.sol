@@ -303,7 +303,7 @@ contract PoolInternalV1 is PoolStateV1 {
         if (newNetFlow == 0) {
           superToken.deleteFlow(address(this), _supplier);
         } else {
-          newCtx = superToken.deleteFlowWithCtx(_ctx, address(this), _supplier);
+          newCtx = superToken.deleteFlowWithCtx(address(this), _supplier, _ctx);
         }
 
         _cancelTask(supplier.outStream.cancelWithdrawId);

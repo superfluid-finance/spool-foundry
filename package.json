@@ -14,6 +14,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "@superfluid-finance/ethereum-contracts": "^1.5.0",
     "@typechain/ethers-v5": "^10.2.0",
     "@types/node": "^18.11.9",
