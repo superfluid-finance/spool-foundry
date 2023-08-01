@@ -15,6 +15,7 @@ import { IPoolV1 } from "../interfaces/IPool-V1.sol";
  * @notice A standard library of data types used throughout.
  */
 library DataTypes {
+
   struct SuperPoolFactoryInitializer {
     ISuperfluid host;
     address poolImpl;
@@ -49,16 +50,7 @@ library DataTypes {
     address poolInternal;
   }
 
-  struct PoolRecord {
-    address pool;
-    address poolInternal;
-  }
-
   ///// Supplier
-
-  struct Stream {
-    int96 flow;
-  }
 
   struct OutStream {
     int96 flow;
