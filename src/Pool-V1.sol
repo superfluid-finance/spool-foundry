@@ -225,21 +225,12 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyHost onlyNotEmergency returns (bytes memory newCtx) {
     newCtx = _ctx;
-
-    (address sender, address receiver) = abi.decode(_agreementData, (address, address));
-
+    (address sender, ) = abi.decode(_agreementData, (address, address));
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
-
-    //// If In-Stream we will request a pool update
-
-    if (receiver == address(this)) {
-      newCtx = _updateStreamRecord(newCtx, inFlowRate, sender);
-
-      emitEvents(sender);
-      bytes memory payload = abi.encode(inFlowRate);
-      emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_START, payload, block.timestamp, sender);
-    }
-    return newCtx;
+    //// If In-Stream we will request a pool update - SuperApp is always the receiver, can't self streams
+    newCtx = _updateStreamRecord(newCtx, inFlowRate, sender);
+    emitEvents(sender);
+    emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_START, abi.encode(inFlowRate), block.timestamp, sender);
   }
 
   function afterAgreementTerminated(
