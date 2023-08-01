@@ -8,6 +8,7 @@
     "test": "test"
   },
   "scripts": {
+    "postinstall": "forge install",
     "test": "echo \"Error: no test specified\" && exit 1",
     "typechain": "typechain --target ethers-v5 'out/**/!(*.t|test).sol/!(*.abi).json' --out-dir typechain-types"
   },
