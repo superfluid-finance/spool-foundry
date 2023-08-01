@@ -4,14 +4,10 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import { DeployPool } from "./fixtures/Deploy.t.sol";
 import { Users } from "./fixtures/Users.t.sol";
-
 import { Report } from "./fixtures/Report.t.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 contract PoolTest is Test, DeployPool, Report {
-  using SafeMath for uint256;
 
   function setUp() public {
     deploy();
@@ -19,9 +15,6 @@ contract PoolTest is Test, DeployPool, Report {
     faucet(user4);
     payable(poolProxy).transfer(1 ether);
   }
-
-  
-
 
   function testFuzzRedeemFlow() public {
     int96 flowRate = 9960840000000000;//9960845554548347;
@@ -78,7 +71,7 @@ contract PoolTest is Test, DeployPool, Report {
 
     address user = getUser(userInt);
 
-    if (depositAmount.div(10 ** 12) > withdrawAmount.div(10 ** 12) && superToken.balanceOf(user) > depositAmount && depositAmount > 0) {
+    if (depositAmount / (10 ** 12) > withdrawAmount / (10 ** 12) && superToken.balanceOf(user) > depositAmount && depositAmount > 0) {
       sendToPool(user, depositAmount);
 
       if (withdrawAmount > depositAmount) {

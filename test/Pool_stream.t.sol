@@ -9,13 +9,9 @@ import { Gelato } from "./fixtures/Gelato.t.sol";
 import { Report } from "./fixtures/Report.t.sol";
 import { DecodeFile } from "./fixtures/DecodeFile.t.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { HelpTypes } from "./fixtures/TestTypes.t.sol";
 
 contract PoolStream is Test, DeployPool, Report, DecodeFile {
-  using SafeMath for uint256;
 
   mapping(address => HelpTypes.eUser) users;
 
@@ -40,7 +36,7 @@ contract PoolStream is Test, DeployPool, Report, DecodeFile {
 
     vm.warp(block.timestamp + 60 days);
 
-    int96 flowRate1 = int96(uint96(uint256(100 ether).div(30 days)));
+    int96 flowRate1 = int96(uint96(uint256(100 ether) / 30 days));
 
     startFlow(user2, flowRate1);
 
@@ -56,7 +52,7 @@ contract PoolStream is Test, DeployPool, Report, DecodeFile {
     redeemFlow(user1, flowRate1);
     uint256 initialBuffer = 1 hours * uint96(flowRate1);
     uint256 initialWithdraw = 4 hours * uint96(flowRate1);
-    uint256 nextExec = (poolProxy.balanceOf(user1).sub(initialBuffer.add(initialWithdraw))).div(uint96(flowRate1));
+    uint256 nextExec = (poolProxy.balanceOf(user1) - (initialBuffer + initialWithdraw)) / uint96(flowRate1);
 
     console.log(initialBuffer + initialWithdraw);
     console.log(initialBuffer + initialWithdraw - getFlowDeposit(address(poolProxy), user1));
@@ -78,7 +74,7 @@ contract PoolStream is Test, DeployPool, Report, DecodeFile {
 
     // #region =================  5th PERIOD ============================= //
     vm.warp(block.timestamp + 30 days);
-    int96 flowRate60 = int96(uint96(uint256(60 ether).div(30 days)));
+    int96 flowRate60 = int96(uint96(uint256(60 ether) / 30 days));
 
     startFlow(user1, flowRate60);
     checkFilePool("./test/expected/test-stream/expected5.json");

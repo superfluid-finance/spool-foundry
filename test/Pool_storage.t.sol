@@ -9,13 +9,9 @@ import { Gelato } from "./fixtures/Gelato.t.sol";
 import { Report } from "./fixtures/Report.t.sol";
 import { DecodeFile } from "./fixtures/DecodeFile.t.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { HelpTypes } from "./fixtures/TestTypes.t.sol";
 
 contract PoolStorage is Test, DeployPool, Report, DecodeFile {
-  using SafeMath for uint256;
 
   mapping(address => HelpTypes.eUser) users;
 

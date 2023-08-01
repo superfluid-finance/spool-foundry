@@ -5,17 +5,12 @@ import "forge-std/Test.sol";
 import { DeployPool } from "./fixtures/Deploy.t.sol";
 import { Users } from "./fixtures/Users.t.sol";
 import { Gelato } from "./fixtures/Gelato.t.sol";
-
 import { Report } from "./fixtures/Report.t.sol";
 import { DecodeFile } from "./fixtures/DecodeFile.t.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { HelpTypes } from "./fixtures/TestTypes.t.sol";
 
 contract PoolAccounting is Test, DeployPool, Report, DecodeFile {
-  using SafeMath for uint256;
 
   function setUp() public {
     deploy();
@@ -37,7 +32,7 @@ contract PoolAccounting is Test, DeployPool, Report, DecodeFile {
     // #region =================  SECOND PERIOD ============================= //
 
     vm.warp(block.timestamp + 60 days);
-    int96 flowRate = int96(uint96(uint256(100 ether).div(30 days)));
+    int96 flowRate = int96(uint96(uint256(100 ether) / 30 days));
 
     startFlow(user2, flowRate);
     checkFilePool("./test/expected/accounting/expected2.json");
@@ -82,7 +77,7 @@ contract PoolAccounting is Test, DeployPool, Report, DecodeFile {
 
     // #region =================  7th PERIOD ============================= //
     vm.warp(block.timestamp + 30 days);
-    flowRate = int96(uint96(uint256(50 ether).div(30 days)));
+    flowRate = int96(uint96(uint256(50 ether) / 30 days));
     redeemFlow(user2, flowRate);
     checkFilePool("./test/expected/accounting/expected7.json");
     checkFileUser("./test/expected/accounting/7-user-expected1.json", user1);
@@ -110,7 +105,7 @@ contract PoolAccounting is Test, DeployPool, Report, DecodeFile {
 
     // #region =================  10th PERIOD ============================= //
     vm.warp(block.timestamp + 30 days);
-    int96 flowRate2 = int96(uint96(uint256(90 ether).div(30 days)));
+    int96 flowRate2 = int96(uint96(uint256(90 ether) / 30 days));
     startFlow(user3, flowRate2);
     checkFilePool("./test/expected/accounting/expected10.json");
     checkFileUser("./test/expected/accounting/10-user-expected1.json", user1);
@@ -121,7 +116,7 @@ contract PoolAccounting is Test, DeployPool, Report, DecodeFile {
 
     // #region =================  11th PERIOD ============================= //
     vm.warp(block.timestamp + 30 days);
-    int96 flowRateOut = int96(uint96(uint256(45 ether).div(30 days)));
+    int96 flowRateOut = int96(uint96(uint256(45 ether) / 30 days));
     redeemFlow(user1, flowRateOut);
     checkFilePool("./test/expected/accounting/expected11.json");
     checkFileUser("./test/expected/accounting/11-user-expected1.json", user1);
@@ -132,7 +127,7 @@ contract PoolAccounting is Test, DeployPool, Report, DecodeFile {
 
     // #region =================  12th PERIOD ============================= //
     vm.warp(block.timestamp + 30 days);
-    int96 flowRateOut2 = int96(uint96(uint256(45 ether).div(30 days)));
+    int96 flowRateOut2 = int96(uint96(uint256(45 ether) / 30 days));
     redeemFlow(user2, flowRateOut2);
     checkFilePool("./test/expected/accounting/expected12.json");
     checkFileUser("./test/expected/accounting/12-user-expected1.json", user1);

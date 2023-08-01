@@ -9,13 +9,9 @@ import { Gelato } from "./fixtures/Gelato.t.sol";
 import { Report } from "./fixtures/Report.t.sol";
 import { DecodeFile } from "./fixtures/DecodeFile.t.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { HelpTypes } from "./fixtures/TestTypes.t.sol";
 
 contract PoolTreasury is Test, DeployPool, Report, DecodeFile {
-  using SafeMath for uint256;
 
   mapping(address => HelpTypes.eUser) users;
 
@@ -40,7 +36,7 @@ contract PoolTreasury is Test, DeployPool, Report, DecodeFile {
 
     vm.warp(block.timestamp + 60 days);
 
-    int96 flowRate1 = int96(uint96(uint256(100 ether).div(30 days)));
+    int96 flowRate1 = int96(uint96(uint256(100 ether) / 30 days));
 
     startFlow(user2, flowRate1);
 
@@ -52,7 +48,7 @@ contract PoolTreasury is Test, DeployPool, Report, DecodeFile {
     // #region ================= THIRD PERIOD ============================= //
 
     vm.warp(block.timestamp + 30 days);
-    int96 flowRate2 = int96(uint96(uint256(150 ether).div(30 days)));
+    int96 flowRate2 = int96(uint96(uint256(150 ether) / 30 days));
 
     redeemFlow(user1, flowRate2);
 
@@ -72,7 +68,7 @@ contract PoolTreasury is Test, DeployPool, Report, DecodeFile {
     gelatoBalance();
 
     vm.warp(block.timestamp + 6 hours);
-    int96 flowRate50 = int96(uint96(uint256(50 ether).div(30 days)));
+    int96 flowRate50 = int96(uint96(uint256(50 ether) / 30 days));
     startFlow(user3, flowRate50);
 
     checkFilePool("./test/expected/treasury/expected4.json");
@@ -84,7 +80,7 @@ contract PoolTreasury is Test, DeployPool, Report, DecodeFile {
 
     // #region =================  5th PERIOD ============================= //
     vm.warp(block.timestamp + 17 hours);
-    int96 flowRate40 = int96(uint96(uint256(40 ether).div(30 days)));
+    int96 flowRate40 = int96(uint96(uint256(40 ether) / 30 days));
 
     updateFlow(user2, flowRate40);
     checkFilePool("./test/expected/treasury/expected5.json");
@@ -102,7 +98,7 @@ contract PoolTreasury is Test, DeployPool, Report, DecodeFile {
 
     // #region =================  5th PERIOD ============================= //
     vm.warp(block.timestamp + 4 hours);
-    int96 flowRate18 = int96(uint96(uint256(90 ether).div(30 days)));
+    int96 flowRate18 = int96(uint96(uint256(90 ether) / 30 days));
     redeemFlow(user1, flowRate18);
     checkFilePool("./test/expected/treasury/expected6.json");
     checkFileUser("./test/expected/treasury/6-user-expected1.json", user1);
