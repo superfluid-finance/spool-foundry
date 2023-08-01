@@ -230,7 +230,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyHost onlyNotEmergency returns (bytes memory newCtx) {
     newCtx = _ctx;
-    (address sender, address receiver) = abi.decode(_agreementData, (address, address));
+    (address sender, ) = abi.decode(_agreementData, (address, address));
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
     //// If In-Stream we will request a pool update - SuperApp is always the receiver, can't self streams
     newCtx = _updateStreamRecord(newCtx, inFlowRate, sender);
