@@ -49,21 +49,17 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    * @notice initializer of the Pool
    */
   function initialize(DataTypes.PoolInitializer memory poolInit) external initializer {
-    ///initialState
 
     _name = poolInit.name;
     _symbol = poolInit.symbol;
-    //// super app && superfluid
     host = poolInit.host;
     owner = poolInit.owner;
     superToken = poolInit.superToken;
-
     cfa = IConstantFlowAgreementV1(address(host.getAgreementClass(keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1"))));
     token = poolInit.token;
     owner = poolInit.owner;
     poolFactory = msg.sender;
 
-    //MAX_INT = 2 ** 256 - 1;
 
     //// tokens receie implementation
     IERC1820Registry _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
@@ -79,8 +75,8 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     poolStrategy = address(poolInit.poolStrategy);
     poolInternal = poolInit.poolInternal;
 
-    token.approve(address(poolStrategy), MAX_INT);
-    superToken.approve(address(poolStrategy), MAX_INT);
+    token.approve(address(poolStrategy), type(uint256).max);
+    superToken.approve(address(poolStrategy), type(uint256).max);
 
     lastPoolTimestamp = block.timestamp;
     poolByTimestamp[block.timestamp].timestamp = block.timestamp;
