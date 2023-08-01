@@ -2,25 +2,19 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/console.sol";
-import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { ISuperfluid, ISuperAgreement, ISuperToken, ISuperApp, SuperAppDefinitions } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import { ISuperfluid, ISuperToken, ISuperApp, SuperAppDefinitions } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { UUPSProxy } from "./upgradability/UUPSProxy.sol";
 import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
 import { IUUPSProxiable } from "./upgradability/IUUPSProxiable.sol";
-
 import { IPoolV1 } from "./interfaces/IPool-V1.sol";
 import { PoolV1 } from "./Pool-V1.sol";
-import { IPoolInternalV1 } from "./interfaces/IPoolInternal-V1.sol";
-
 import { IOps } from "./gelato/IOps.sol";
-
 import { DataTypes } from "./libraries/DataTypes.sol";
-import { Events } from "./libraries/Events.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
 

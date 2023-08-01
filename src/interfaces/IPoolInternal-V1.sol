@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { DataTypes } from "../libraries/DataTypes.sol";
-import { ISuperfluid, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-
-import { IPoolV1 } from "./IPool-V1.sol";
-
 interface IPoolInternalV1 {
   function initialize() external;
   // #region  ============= =============  Pool Events (supplier interaction) ============= ============= //

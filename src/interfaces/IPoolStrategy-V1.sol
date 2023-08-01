@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { DataTypes } from "../libraries/DataTypes.sol";
+
 import { IPoolV1 } from "./IPool-V1.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { ERC20mintable } from "./ERC20mintable.sol";

@@ -3,30 +3,22 @@ pragma solidity ^0.8.0;
 
 import "forge-std/console.sol";
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
-import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-
-import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+import { SuperTokenV1Library, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import { IConstantFlowAgreementV1 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
-import { ISuperfluid, ISuperAgreement, ISuperToken, ISuperApp, SuperAppDefinitions } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import { ISuperAgreement, ISuperApp } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { SuperAppBase } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
-
 import { OpsReady } from "./gelato/OpsReady.sol";
 import { IOps } from "./gelato/IOps.sol";
-import { LibDataTypes } from "./gelato/LibDataTypes.sol";
-
 import { IPoolV1, IDelegatedPool } from "./interfaces/IPool-V1.sol";
-import { IPoolInternalV1 } from "./interfaces/IPoolInternal-V1.sol";
-import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
 import { PoolStateV1 } from "./PoolState-V1.sol";
-
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Events } from "./libraries/Events.sol";
 

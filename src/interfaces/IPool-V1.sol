@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import { DataTypes } from "../libraries/DataTypes.sol";
-import { ISuperfluid, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 interface IDelegatedPool {
