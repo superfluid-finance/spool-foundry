@@ -233,6 +233,30 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_START, abi.encode(inFlowRate), block.timestamp, sender);
   }
 
+function afterAgreementUpdated(
+    ISuperToken _superToken,
+    address _agreementClass,
+    bytes32, // _agreementId,
+    bytes calldata _agreementData,
+    bytes calldata, //_cbdata,
+    bytes calldata _ctx
+  ) external override onlyExpected(_superToken, _agreementClass) onlyNotEmergency onlyHost returns (bytes memory newCtx) {
+    newCtx = _ctx;
+
+    (address sender, address receiver) = abi.decode(_agreementData, (address, address));
+
+    int96 inFlowRate = superToken.getFlowRate(sender, address(this));
+
+    // If In-Stream we will request a pool update
+    if (receiver == address(this)) {
+      newCtx = _updateStreamRecord(newCtx, inFlowRate, sender);
+      emitEvents(sender);
+      emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_UPDATE, abi.encode(""), block.timestamp, sender);
+    }
+
+    return newCtx;
+  }
+
   function afterAgreementTerminated(
     ISuperToken, /*superToken*/
     address, /*agreementClass*/
@@ -240,7 +264,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _agreementData,
     bytes calldata, /*cbdata*/
     bytes calldata _ctx
-  ) external override returns (bytes memory newCtx) {
+  ) external override onlyHost returns (bytes memory newCtx) {
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
     newCtx = _ctx;
 
@@ -258,33 +282,8 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     return newCtx;
   }
 
-  function afterAgreementUpdated(
-    ISuperToken _superToken,
-    address _agreementClass,
-    bytes32, // _agreementId,
-    bytes calldata _agreementData,
-    bytes calldata, //_cbdata,
-    bytes calldata _ctx
-  ) external override onlyExpected(_superToken, _agreementClass) onlyNotEmergency onlyHost returns (bytes memory newCtx) {
-    newCtx = _ctx;
 
-    (address sender, address receiver) = abi.decode(_agreementData, (address, address));
-
-    int96 inFlowRate = superToken.getFlowRate(sender, address(this));
-
-    // If In-Stream we will request a pool update
-    if (receiver == address(this)) {
-      newCtx = _updateStreamRecord(newCtx, inFlowRate, sender);
-
-      emitEvents(sender);
-
-      bytes memory payload = abi.encode("");
-
-      emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_UPDATE, payload, block.timestamp, sender);
-    }
-
-    return newCtx;
-  }
+  
 
   function _updateStreamRecord(bytes memory newCtx, int96 inFlowRate, address sender) internal returns (bytes memory updateCtx) {
     bytes memory data = callInternal(abi.encodeWithSignature("_updateSupplierFlow(address,int96,int96,bytes)", sender, inFlowRate, 0, newCtx));
