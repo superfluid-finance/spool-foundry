@@ -1,9 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "forge-std/console.sol";
-
-
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
@@ -235,7 +232,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyHost onlyNotEmergency returns (bytes memory newCtx) {
     newCtx = _ctx;
-    console.log("24---GGGGGGGGGGGUUUAUUAUAUAUUA");
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
 
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
@@ -262,21 +258,15 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   ) external override returns (bytes memory newCtx) {
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
     newCtx = _ctx;
-
-    console.log("276---GGGGGGGGGGGUUUAUUAUAUAUUA");
-
     //// If In-Stream we will request a pool update
     if (receiver == address(this)) {
       newCtx = _updateStreamRecord(newCtx, 0, sender);
       emitEvents(sender);
-      bytes memory payload = abi.encode("");
-      emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_STOP, payload, block.timestamp, sender);
+      emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_STOP, abi.encode(""), block.timestamp, sender);
     } else if (sender == address(this)) {
       callInternal(abi.encodeWithSignature("_redeemFlowStop(address)", receiver));
-
       emitEvents(receiver);
-      bytes memory payload = abi.encode("");
-      emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, payload, block.timestamp, receiver);
+      emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, abi.encode(""), block.timestamp, receiver);
     }
 
     return newCtx;
@@ -291,7 +281,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyNotEmergency onlyHost returns (bytes memory newCtx) {
     newCtx = _ctx;
-    console.log("305---GGGGGGGGGGGUUUAUUAUAUAUUA");
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
 
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
@@ -442,7 +431,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   // #endregion =========== =============  Modifiers ============= ============= //
 
   receive() external payable {
-    console.log("----- receive:", msg.value);
+
   }
 
   function withdraw() external onlyOwner returns (bool) {
