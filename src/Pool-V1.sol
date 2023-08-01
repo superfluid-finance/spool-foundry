@@ -1,10 +1,6 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "forge-std/console.sol";
-
-
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
@@ -42,14 +38,12 @@ import { Events } from "./libraries/Events.sol";
  *
  */
 contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC777Recipient, IPoolV1, IERC20 {
-  using SafeMath for uint256;
   using SuperTokenV1Library for ISuperToken;
 
   /**
    * @notice initializer of the Pool
    */
   function initialize(DataTypes.PoolInitializer memory poolInit) external initializer {
-
     _name = poolInit.name;
     _symbol = poolInit.symbol;
     host = poolInit.host;
@@ -59,7 +53,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     token = poolInit.token;
     owner = poolInit.owner;
     poolFactory = msg.sender;
-
 
     //// tokens receie implementation
     IERC1820Registry _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
@@ -85,7 +78,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
     balanceTreasuryTask = abi.decode(data, (bytes32)); // createBalanceTreasuryTask();
   }
-
 
   // #region ============ ===============  PUBLIC VIEW FUNCTIONS  ============= ============= //
 
@@ -136,18 +128,17 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    * @param from Supplier (user sending tokens)
    * @param amount amount received
    */
-  function tokensReceived(address, address from, address, uint256 amount, bytes calldata, bytes calldata) external override (IERC777Recipient, IPoolV1) onlyNotEmergency {
+  function tokensReceived(address, address from, address, uint256 amount, bytes calldata, bytes calldata) external override(IERC777Recipient, IPoolV1) onlyNotEmergency {
     require(msg.sender == address(superToken), "INVALID_TOKEN");
     require(amount > 0, "AMOUNT_TO_BE_POSITIVE");
 
     if (from != poolStrategy) {
+      callInternal(abi.encodeWithSignature("_tokensReceived(address,uint256)", from, amount));
 
-    callInternal(abi.encodeWithSignature("_tokensReceived(address,uint256)", from, amount));
+      emitEvents(from);
 
-    emitEvents(from);
-
-    bytes memory payload = abi.encode(amount);
-    emit Events.SupplierEvent(DataTypes.SupplierEvent.DEPOSIT, payload, block.timestamp, from);
+      bytes memory payload = abi.encode(amount);
+      emit Events.SupplierEvent(DataTypes.SupplierEvent.DEPOSIT, payload, block.timestamp, from);
     }
   }
 
@@ -235,7 +226,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyHost onlyNotEmergency returns (bytes memory newCtx) {
     newCtx = _ctx;
-    console.log("24---GGGGGGGGGGGUUUAUUAUAUAUUA");
+
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
 
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
@@ -263,8 +254,6 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
     newCtx = _ctx;
 
-    console.log("276---GGGGGGGGGGGUUUAUUAUAUAUUA");
-
     //// If In-Stream we will request a pool update
     if (receiver == address(this)) {
       newCtx = _updateStreamRecord(newCtx, 0, sender);
@@ -291,7 +280,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     bytes calldata _ctx
   ) external override onlyExpected(_superToken, _agreementClass) onlyNotEmergency onlyHost returns (bytes memory newCtx) {
     newCtx = _ctx;
-    console.log("305---GGGGGGGGGGGUUUAUUAUAUAUUA");
+
     (address sender, address receiver) = abi.decode(_agreementData, (address, address));
 
     int96 inFlowRate = superToken.getFlowRate(sender, address(this));
@@ -373,7 +362,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   }
 
   function transferToGelato(uint256 _amount) internal {
-    (bool success,) = gelato.call{value: _amount}("");
+    (bool success,) = gelato.call{ value: _amount }("");
     require(success, "_transfer: ETH transfer failed");
   }
 
@@ -441,12 +430,10 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
   // #endregion =========== =============  Modifiers ============= ============= //
 
-  receive() external payable {
-    console.log("----- receive:", msg.value);
-  }
+  receive() external payable { }
 
   function withdraw() external onlyOwner returns (bool) {
-    (bool result,) = payable(msg.sender).call{value: address(this).balance}("");
+    (bool result,) = payable(msg.sender).call{ value: address(this).balance }("");
     return result;
   }
 
@@ -457,8 +444,8 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   }
 
   // #region ============ ===============  ERC20 implementation ============= ============= //
-  function balanceOf(address _supplier) public view override (IPoolV1, IERC20) returns (uint256 balance) {
-    return IDelegatedPool(address(this))._getSupplierBalance(_supplier).div(PRECISSION);
+  function balanceOf(address _supplier) public view override(IPoolV1, IERC20) returns (uint256 balance) {
+    return IDelegatedPool(address(this))._getSupplierBalance(_supplier) / PRECISION;
   }
 
   function _transfer(address from, address to, uint256 amount) internal {
@@ -480,7 +467,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     emit Events.SupplierUpdate(toSupplier);
   }
 
-  function totalSupply() public view override (IPoolV1, IERC20) returns (uint256 _totalSupply) {
+  function totalSupply() public view override(IPoolV1, IERC20) returns (uint256 _totalSupply) {
     DataTypes.Pool memory lastPool = poolByTimestamp[lastPoolTimestamp];
     uint256 periodSpan = block.timestamp - lastPool.timestamp;
     _totalSupply = lastPool.deposit + uint96(lastPool.inFlowRate) * periodSpan - uint96(lastPool.outFlowRate) * periodSpan;

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "forge-std/console.sol";
-
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IPoolV1 } from "./interfaces/IPool-V1.sol";
 import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
@@ -25,7 +22,6 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
  *
  */
 contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
-  using SafeMath for uint256;
 
   address owner;
 
@@ -100,8 +96,8 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
 
   ////////////// IN PRODUCTIONM REMOVE the 10**12 FACTOR
   function _withdraw(uint256 amount, address _supplier) internal {
-    if (amount.div(10 ** 12) > 0) {
-      aavePool.withdraw(address(aaveToken), amount.div(10 ** 12), address(this));
+    if (amount / (10 ** 12) > 0) {
+      aavePool.withdraw(address(aaveToken), amount / (10 ** 12), address(this));
 
       uint256 balanceToken = token.balanceOf(address(this));
 
