@@ -46,13 +46,13 @@ abstract contract Users is Test, Config {
   }
 
   function transfer(address sender, address receiver, uint256 amount) internal {
-    vm.prank(sender);
+    vm.startPrank(sender);
     IERC20(address(poolProxy)).transfer(receiver, amount);
     vm.stopPrank();
   }
 
   function sendToPool(address sender, uint256 amount) internal {
-    vm.prank(sender);
+    vm.startPrank(sender);
     IERC777(address(superToken)).send(address(poolProxy), amount, "0x");
     vm.stopPrank();
   }
