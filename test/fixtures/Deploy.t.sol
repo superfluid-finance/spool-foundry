@@ -62,13 +62,18 @@ abstract contract DeployPool is Test, Config {
 
     ISuperPoolFactory(address(poolFactoryProxy)).initialize(factoryInitialize);
 
-    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(DataTypes.CreatePoolInput(address(superToken), address(strategyProxy)));
+    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(DataTypes.CreatePoolInput(
+      address(superToken),
+      address(strategyProxy),
+      token,
+      aavePool,
+      aToken,
+      aaveToken
+    ));
 
     poolInfo = ISuperPoolFactory(address(poolFactoryProxy)).getRecordBySuperTokenAddress(address(superToken), address(strategyProxy));
 
     poolProxy = PoolV1(payable(poolInfo.pool));
-
-    IPoolStrategyV1(address(strategyProxy)).initialize(superToken, token, IPoolV1(poolProxy), aavePool, aToken, aaveToken);
 
     string memory line1 = string(abi.encodePacked('{"pool":"', vm.toString(address(poolProxy)), '"}'));
     vm.writeFile("./test/addresses.json", line1);

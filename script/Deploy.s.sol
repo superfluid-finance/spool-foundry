@@ -71,13 +71,18 @@ contract DeployScript is Script {
 
     ISuperPoolFactory(address(poolFactoryProxy)).initialize(factoryInitialize);
 
-    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(DataTypes.CreatePoolInput(address(superToken), address(strategyProxy)));
+    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(DataTypes.CreatePoolInput(
+      address(superToken),
+      address(strategyProxy),
+      token,
+      aavePool,
+      aToken,
+      aaveToken
+    ));
 
     DataTypes.PoolInfo memory poolInfo = ISuperPoolFactory(address(poolFactoryProxy)).getRecordBySuperTokenAddress(address(superToken), address(strategyProxy));
 
     address poolProxy = poolInfo.pool;
-
-    IPoolStrategyV1(address(strategyProxy)).initialize(superToken, token, IPoolV1(poolProxy), aavePool, aToken, aaveToken);
 
     vm.stopBroadcast();
   }

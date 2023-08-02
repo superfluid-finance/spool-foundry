@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ISuperfluid, ISuperToken, ISuperApp, SuperAppDefinitions } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { UUPSProxy } from "./upgradability/UUPSProxy.sol";
 import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
@@ -12,6 +12,9 @@ import { IOps } from "./gelato/IOps.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
+import { ERC20mintable } from "./interfaces/ERC20mintable.sol";
+import { IPool } from "./aave/IPool.sol";
+
 
 contract SuperPoolFactory is Initializable, UUPSProxiable {
 
@@ -43,7 +46,9 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
     owner = msg.sender;
   }
 
-  function createSuperPool(DataTypes.CreatePoolInput memory poolInput) external {
+  function createSuperPool(
+    DataTypes.CreatePoolInput memory poolInput
+  ) external {
     DataTypes.PoolInfo memory existsPool = poolInfoById[poolIdBySuperTokenStrategy[poolInput.superToken][poolInput.poolStrategy]];
     require(existsPool.pool == address(0), "POOL_EXISTS");
     nrPools++;
@@ -76,6 +81,16 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
     });
 
     IPoolV1(address(poolProxy)).initialize(poolInit);
+
+    // initialize strategy
+    IPoolStrategyV1(poolInput.poolStrategy).initialize(
+      ISuperToken(poolInput.superToken),
+      poolInput._token,
+      IPoolV1(address(poolProxy)),
+      poolInput._aavePool,
+      poolInput._aToken,
+      poolInput._aaveToken
+    );
 
     uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL | 
       SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP | 

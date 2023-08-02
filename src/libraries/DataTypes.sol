@@ -7,6 +7,9 @@ import { IPoolStrategyV1 } from "../interfaces/IPoolStrategy-V1.sol";
 import { IOps } from "../gelato/IOps.sol";
 import { IPoolInternalV1 } from "../interfaces/IPoolInternal-V1.sol";
 import { IPoolV1 } from "../interfaces/IPool-V1.sol";
+import { ERC20mintable } from "../interfaces/ERC20mintable.sol";
+import { IPool } from "../aave/IPool.sol";
+
 
 /**
  * @title DataTypes
@@ -26,6 +29,10 @@ library DataTypes {
   struct CreatePoolInput {
     address superToken;
     address poolStrategy;
+    ERC20mintable _token;
+    IPool _aavePool;
+    IERC20 _aToken;
+    ERC20mintable _aaveToken;
   }
 
   struct PoolInitializer {

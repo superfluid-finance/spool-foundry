@@ -144,17 +144,13 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
   /**
    * @notice User redeem deposit (withdraw)
-   * @param redeemAmount amount to be reddemed
+   * @param redeemAmount amount to be redeemed
    */
   function redeemDeposit(uint256 redeemAmount) external override onlyNotEmergency {
     address _supplier = msg.sender;
-
     callInternal(abi.encodeWithSignature("_redeemDeposit(address,uint256)", _supplier, redeemAmount));
-
     emitEvents(_supplier);
-
-    bytes memory payload = abi.encode(redeemAmount);
-    emit Events.SupplierEvent(DataTypes.SupplierEvent.WITHDRAW, payload, block.timestamp, _supplier);
+    emit Events.SupplierEvent(DataTypes.SupplierEvent.WITHDRAW, abi.encode(redeemAmount), block.timestamp, _supplier);
   }
 
   /**
@@ -166,20 +162,18 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   function redeemFlow(int96 _outFlowRate) external onlyNotEmergency {
     require(_outFlowRate > 0, "FLOWRATE_SHOULD_BE_GREATER_THAN_ZERO");
     address _supplier = msg.sender;
-
     uint256 realTimeBalance = balanceOf(_supplier);
-
-    ///
     require(realTimeBalance > 0, "NO_BALANCE");
 
-    DataTypes.SupplierEvent flowEvent = suppliersByAddress[_supplier].outStream.flow > 0 ? DataTypes.SupplierEvent.OUT_STREAM_UPDATE : DataTypes.SupplierEvent.OUT_STREAM_START;
+    DataTypes.SupplierEvent flowEvent = suppliersByAddress[_supplier].outStream.flow > 0 ?
+      DataTypes.SupplierEvent.OUT_STREAM_UPDATE :
+      DataTypes.SupplierEvent.OUT_STREAM_START;
 
     callInternal(abi.encodeWithSignature("_redeemFlow(address,int96)", _supplier, _outFlowRate));
 
     emitEvents(_supplier);
 
-    bytes memory payload = abi.encode(_outFlowRate);
-    emit Events.SupplierEvent(flowEvent, payload, block.timestamp, _supplier);
+    emit Events.SupplierEvent(flowEvent, abi.encode(_outFlowRate), block.timestamp, _supplier);
   }
 
   function taskClose(address _supplier) external onlyNotEmergency onlyOps {
@@ -195,15 +189,12 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    */
   function redeemFlowStop() external onlyNotEmergency {
     address _supplier = msg.sender;
-
     require(suppliersByAddress[_supplier].outStream.flow > 0, "OUT_STREAM_NOT_EXISTS");
 
     callInternal(abi.encodeWithSignature("_redeemFlowStop(address)", _supplier));
 
     emitEvents(_supplier);
-
-    bytes memory payload = abi.encode("");
-    emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, payload, block.timestamp, _supplier);
+    emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, abi.encode(""), block.timestamp, _supplier);
   }
 
   /**
