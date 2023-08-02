@@ -161,31 +161,33 @@ contract PoolInternalV1 is PoolStateV1 {
    */
   function _supplierUpdateCurrentState(address _supplier) internal {
     DataTypes.Supplier memory supplier = _getSupplier(_supplier);
-    DataTypes.Pool memory pool = poolByTimestamp[block.timestamp];
 
-    if (supplier.timestamp < block.timestamp) {
-      uint256 yieldSupplier = totalYieldEarnedSupplier(_supplier, IPoolStrategyV1(poolStrategy).balanceOf());
+    if (supplier.timestamp >= block.timestamp) {
+      return;
+    }
+
+    DataTypes.Pool memory pool = poolByTimestamp[block.timestamp];
+    uint256 yieldSupplier = totalYieldEarnedSupplier(_supplier, IPoolStrategyV1(poolStrategy).balanceOf());
+    uint256 flow = 0;
+    uint256 multiplier = PRECISSION * (block.timestamp - supplier.timestamp);
 
       if (supplier.inStream > 0) {
-        uint256 inflow = uint96(supplier.inStream) * (block.timestamp - supplier.timestamp);
-        pool.depositFromInFlowRate = pool.depositFromInFlowRate - inflow * PRECISSION;
-        pool.deposit = inflow * PRECISSION + pool.deposit;
-        supplier.deposit = supplier.deposit + inflow * PRECISSION;
+        flow = uint96(supplier.inStream) * multiplier;
+        pool.depositFromInFlowRate -= flow;
+        pool.deposit += flow;
+        supplier.deposit += flow;
       } else if (supplier.outStream.flow > 0) {
-        uint256 outflow = uint96(supplier.outStream.flow) * (block.timestamp - supplier.timestamp);
-
-        pool.depositFromOutFlowRate = pool.depositFromOutFlowRate - outflow * PRECISSION;
-
-        pool.deposit = pool.deposit - outflow * PRECISSION;
-        supplier.deposit = supplier.deposit - outflow * PRECISSION;
+        flow = uint96(supplier.outStream.flow) * multiplier;
+        pool.depositFromOutFlowRate -= flow;
+        pool.deposit -= flow;
+        supplier.deposit -= flow;
       }
 
-      pool.deposit = yieldSupplier + pool.deposit;
-      supplier.deposit = supplier.deposit + yieldSupplier;
+      pool.deposit += yieldSupplier;
+      supplier.deposit += yieldSupplier;
       supplier.timestamp = block.timestamp;
       poolByTimestamp[block.timestamp] = pool;
       suppliersByAddress[_supplier] = supplier;
-    }
   }
 
   /**
