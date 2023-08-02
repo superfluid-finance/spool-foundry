@@ -87,43 +87,38 @@ contract PoolInternalV1 is PoolStateV1 {
    */
   function _poolUpdate() public {
     DataTypes.Pool memory lastPool = poolByTimestamp[lastPoolTimestamp];
-
     uint256 periodSpan = block.timestamp - lastPool.timestamp;
 
-    uint256 currentYieldSnapshot = IPoolStrategyV1(poolStrategy).balanceOf();
-
-    if (periodSpan > 0) {
-      poolId++;
-
-      DataTypes.Pool memory pool = DataTypes.Pool(poolId, block.timestamp, 0, 0, 0, 0, 0, 0, 0, DataTypes.Yield(0, 0, 0, 0, 0, 0, 0));
-      pool.depositFromInFlowRate = uint96(lastPool.inFlowRate) * PRECISSION * periodSpan + lastPool.depositFromInFlowRate;
-      pool.depositFromOutFlowRate = uint96(lastPool.outFlowRate) * PRECISSION * periodSpan + lastPool.depositFromOutFlowRate;
-
-      pool.deposit = lastPool.deposit;
-
-      pool.nrSuppliers = supplierId;
-
-      pool.yieldObject.yieldSnapshot = currentYieldSnapshot;
-      uint256 periodAccrued = pool.yieldObject.yieldSnapshot - lastPool.yieldObject.yieldSnapshot;
-      pool.yieldObject.protocolYield = lastPool.yieldObject.protocolYield + ((periodAccrued * PROTOCOL_FEE) / 100);
-
-      pool.yieldObject.yieldAccrued = (periodAccrued * (100 - PROTOCOL_FEE)) / 100;
-
-      pool.yieldObject.totalYield = lastPool.yieldObject.totalYield + pool.yieldObject.yieldAccrued;
-
-      (pool.yieldObject.yieldTokenIndex, pool.yieldObject.yieldInFlowRateIndex, pool.yieldObject.yieldOutFlowRateIndex) = _calculateIndexes(pool.yieldObject.yieldAccrued, lastPool);
-      pool.yieldObject.yieldTokenIndex = pool.yieldObject.yieldTokenIndex + lastPool.yieldObject.yieldTokenIndex;
-      pool.yieldObject.yieldInFlowRateIndex = pool.yieldObject.yieldInFlowRateIndex + lastPool.yieldObject.yieldInFlowRateIndex;
-      pool.yieldObject.yieldOutFlowRateIndex = pool.yieldObject.yieldOutFlowRateIndex + lastPool.yieldObject.yieldOutFlowRateIndex;
-      pool.inFlowRate = lastPool.inFlowRate;
-      pool.outFlowRate = lastPool.outFlowRate;
-      pool.outFlowBuffer = lastPool.outFlowBuffer;
-
-      pool.timestamp = block.timestamp;
-      poolByTimestamp[block.timestamp] = pool;
-
-      lastPoolTimestamp = block.timestamp;
+    if (periodSpan <= 0) {
+      return;
     }
+
+    poolId++;
+    DataTypes.Pool memory pool = DataTypes.Pool(
+      poolId,
+      block.timestamp,
+      supplierId, // nrSuppliers
+      lastPool.deposit,
+      uint96(lastPool.inFlowRate) * PRECISSION * periodSpan + lastPool.depositFromInFlowRate, // depositFromInFlowRate
+      uint96(lastPool.outFlowRate) * PRECISSION * periodSpan + lastPool.depositFromOutFlowRate, // depositFromOutFlowRate
+      lastPool.inFlowRate,
+      lastPool.outFlowRate,
+      lastPool.outFlowBuffer,
+      DataTypes.Yield(0, 0, 0, 0, 0, 0, 0)
+    );
+
+    pool.yieldObject.yieldSnapshot = IPoolStrategyV1(poolStrategy).balanceOf();
+    uint256 periodAccrued = pool.yieldObject.yieldSnapshot - lastPool.yieldObject.yieldSnapshot;
+    pool.yieldObject.protocolYield = lastPool.yieldObject.protocolYield + ((periodAccrued * PROTOCOL_FEE) / 100);
+    pool.yieldObject.yieldAccrued = (periodAccrued * (100 - PROTOCOL_FEE)) / 100;
+    pool.yieldObject.totalYield = lastPool.yieldObject.totalYield + pool.yieldObject.yieldAccrued;
+    (pool.yieldObject.yieldTokenIndex, pool.yieldObject.yieldInFlowRateIndex, pool.yieldObject.yieldOutFlowRateIndex) = _calculateIndexes(pool.yieldObject.yieldAccrued, lastPool);
+    pool.yieldObject.yieldTokenIndex += lastPool.yieldObject.yieldTokenIndex;
+    pool.yieldObject.yieldInFlowRateIndex += lastPool.yieldObject.yieldInFlowRateIndex;
+    pool.yieldObject.yieldOutFlowRateIndex += lastPool.yieldObject.yieldOutFlowRateIndex;
+
+    poolByTimestamp[block.timestamp] = pool;
+    lastPoolTimestamp = block.timestamp;
   }
 
   // #endregion POOL UPDATE
