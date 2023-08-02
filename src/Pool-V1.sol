@@ -136,13 +136,9 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     require(amount > 0, "AMOUNT_TO_BE_POSITIVE");
 
     if (from != poolStrategy) {
-
     callInternal(abi.encodeWithSignature("_tokensReceived(address,uint256)", from, amount));
-
     emitEvents(from);
-
-    bytes memory payload = abi.encode(amount);
-    emit Events.SupplierEvent(DataTypes.SupplierEvent.DEPOSIT, payload, block.timestamp, from);
+    emit Events.SupplierEvent(DataTypes.SupplierEvent.DEPOSIT, abi.encode(amount), block.timestamp, from);
     }
   }
 
