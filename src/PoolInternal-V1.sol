@@ -35,17 +35,15 @@ contract PoolInternalV1 is PoolStateV1 {
 
     DataTypes.Pool memory pool = poolByTimestamp[block.timestamp];
     pool = _withdrawTreasury(_supplier, _supplier, redeemAmount, pool);
-
     poolByTimestamp[block.timestamp] = pool;
   }
 
   function _redeemFlow(address _supplier, int96 _outFlowRate) external {
-    bytes memory placeHolder = "0x";
-    _updateSupplierFlow(_supplier, 0, _outFlowRate, placeHolder);
+    _updateSupplierFlow(_supplier, 0, _outFlowRate, new bytes(0));
   }
 
   function _redeemFlowStop(address _supplier) public {
-    _updateSupplierFlow(_supplier, 0, 0, "0x");
+    _updateSupplierFlow(_supplier, 0, 0, new bytes(0));
     DataTypes.Pool memory pool = poolByTimestamp[block.timestamp];
     pool = _balanceTreasury(pool);
     poolByTimestamp[block.timestamp] = pool;
@@ -57,7 +55,7 @@ contract PoolInternalV1 is PoolStateV1 {
       _redeemFlowStop(_supplier);
     } else if (supplier.inStream > 0) {
       superToken.deleteFlow(_supplier, address(this));
-      _updateSupplierFlow(_supplier, 0, 0, "0x");
+      _updateSupplierFlow(_supplier, 0, 0, new bytes(0));
     }
 
     uint256 balance = _getSupplierBalance(_supplier);
@@ -98,7 +96,6 @@ contract PoolInternalV1 is PoolStateV1 {
       poolId++;
 
       DataTypes.Pool memory pool = DataTypes.Pool(poolId, block.timestamp, 0, 0, 0, 0, 0, 0, 0, DataTypes.Yield(0, 0, 0, 0, 0, 0, 0));
-
       pool.depositFromInFlowRate = uint96(lastPool.inFlowRate) * PRECISSION * periodSpan + lastPool.depositFromInFlowRate;
       pool.depositFromOutFlowRate = uint96(lastPool.outFlowRate) * PRECISSION * periodSpan + lastPool.depositFromOutFlowRate;
 
