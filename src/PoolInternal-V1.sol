@@ -200,19 +200,22 @@ contract PoolInternalV1 is PoolStateV1 {
 
     if (supplier.outStream.flow > 0) {
       cancelTask(supplier.outStream.cancelWithdrawId);
+      uint96 flow = uint96(supplier.outStream.flow);
       if (outDeposit > 0) {
         uint256 balance = _getSupplierBalance(_supplier) / PRECISION - outDeposit;
         uint256 outFlowBuffer = POOL_BUFFER * uint96(supplier.outStream.flow);
-        uint256 initialWithdraw = SUPERFLUID_DEPOSIT * uint96(supplier.outStream.flow);
-        uint256 streamDuration =  (balance - (outFlowBuffer + initialWithdraw)) / uint96(supplier.outStream.flow);
+        uint256 initialWithdraw = SUPERFLUID_DEPOSIT * flow;
+        uint256 streamDuration =  (balance - (outFlowBuffer + initialWithdraw)) / flow;
 
         require(streamDuration >= 24 * 3600, "NOT_ENOUGH_BALANCE_WITH_OUTFLOW");
+
         supplier.outStream.streamDuration = streamDuration;
         supplier.outStream.streamInit = block.timestamp;
         supplier.outStream.cancelWithdrawId = _createCloseStreamTask(_supplier, streamDuration);
+
       } else if (inDeposit > 0) {
         uint256 currentEndTime = supplier.outStream.streamInit + supplier.outStream.streamDuration;
-        uint256 addTime = inDeposit / uint96(supplier.outStream.flow);
+        uint256 addTime = inDeposit / flow;
         supplier.outStream.streamDuration = supplier.outStream.streamDuration + addTime;
         supplier.outStream.cancelWithdrawId = _createCloseStreamTask(_supplier, currentEndTime + addTime - block.timestamp);
       }
