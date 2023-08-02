@@ -42,7 +42,7 @@ contract PoolStateV1 {
 
   //// PARAMETERS
 
-  uint256 constant PRECISSION = 1_000_000;
+  uint256 constant PRECISION = 1_000_000;
 
   uint256 constant SUPERFLUID_DEPOSIT = 4 * 3600;
   uint256 constant POOL_BUFFER = 3600; // buffer to keep in the pool (outstream 4hours deposit) + outstream partial deposits

@@ -415,7 +415,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
   // #region ============ ===============  ERC20 implementation ============= ============= //
   function balanceOf(address _supplier) public view override (IPoolV1, IERC20) returns (uint256 balance) {
-    return IDelegatedPool(address(this))._getSupplierBalance(_supplier) / PRECISSION;
+    return IDelegatedPool(address(this))._getSupplierBalance(_supplier) / PRECISION;
   }
 
   function _transfer(address from, address to, uint256 amount) internal {
