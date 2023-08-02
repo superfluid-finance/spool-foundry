@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/Counters.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { ISuperfluid, ISuperToken, ISuperApp, SuperAppDefinitions } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { UUPSProxy } from "./upgradability/UUPSProxy.sol";
 import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
@@ -16,9 +14,8 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
 
 contract SuperPoolFactory is Initializable, UUPSProxiable {
-  using Counters for Counters.Counter;
 
-  Counters.Counter public pools;
+  uint256 public nrPools;
 
   ISuperfluid host;
   IOps ops;
@@ -49,8 +46,7 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
   function createSuperPool(DataTypes.CreatePoolInput memory poolInput) external {
     DataTypes.PoolInfo memory existsPool = poolInfoById[poolIdBySuperTokenStrategy[poolInput.superToken][poolInput.poolStrategy]];
     require(existsPool.pool == address(0), "POOL_EXISTS");
-
-    pools.increment();
+    nrPools++;
     nrStrategiesPerSuperToken[poolInput.superToken] = nrStrategiesPerSuperToken[poolInput.superToken] + 1;
 
     uint256 poolNrBysuperToken = nrStrategiesPerSuperToken[poolInput.superToken];
@@ -67,7 +63,7 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
     // initializer Pool
     DataTypes.PoolInitializer memory poolInit;
     poolInit = DataTypes.PoolInitializer({
-      id: pools.current(),
+      id: nrPools,
       name: string(abi.encodePacked("Super Pool ", tokenName)),
       symbol: string(abi.encodePacked("sp", symbol)),
       host: host,
@@ -90,7 +86,7 @@ contract SuperPoolFactory is Initializable, UUPSProxiable {
 
     // initializer PoolInternal
     DataTypes.PoolInfo memory poolInfo = DataTypes.PoolInfo({
-      id: pools.current(),
+      id: nrPools,
       idPerSupertoken: poolNrBysuperToken,
       superToken: poolInput.superToken,
       strategy: poolInput.poolStrategy,
