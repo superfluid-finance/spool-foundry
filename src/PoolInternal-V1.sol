@@ -125,8 +125,8 @@ contract PoolInternalV1 is PoolStateV1 {
 
   // #region =========== =============  Internal Supplier Update ============= ============= //
 
-  function _getSupplier(address _supplier) internal returns (DataTypes.Supplier memory) {
-    DataTypes.Supplier memory supplier = suppliersByAddress[_supplier];
+  function _getSupplier(address _supplier) internal returns (DataTypes.Supplier memory supplier) {
+    supplier = suppliersByAddress[_supplier];
 
     if (supplier.timestamp == 0) {
       supplier.supplier = _supplier;
@@ -136,22 +136,19 @@ contract PoolInternalV1 is PoolStateV1 {
       poolByTimestamp[block.timestamp].nrSuppliers++;
       suppliersByAddress[_supplier] = supplier;
     }
-
-    return supplier;
   }
 
   function _getSupplierBalance(address _supplier) public view returns (uint256 realtimeBalance) {
     DataTypes.Supplier memory supplier = suppliersByAddress[_supplier];
-
     uint256 yieldSupplier = totalYieldEarnedSupplier(_supplier, IPoolStrategyV1(poolStrategy).balanceOf());
-
     int96 netFlow = supplier.inStream - supplier.outStream.flow;
+    uint256 flowProduct = uint96(_abs(netFlow)) * (block.timestamp - supplier.timestamp) * PRECISSION;
+    return netFlow >= 0 ? yieldSupplier + supplier.deposit + flowProduct : yieldSupplier + supplier.deposit - flowProduct;
+  }
 
-    if (netFlow >= 0) {
-      realtimeBalance = yieldSupplier + (supplier.deposit) + uint96(netFlow) * (block.timestamp - supplier.timestamp) * PRECISSION;
-    } else {
-      realtimeBalance = yieldSupplier + (supplier.deposit) - uint96(supplier.outStream.flow) * (block.timestamp - supplier.timestamp) * PRECISSION;
-    }
+  // helper function to calculate absolute value of int96
+  function _abs(int96 x) internal pure returns (uint96) {
+    return x >= 0 ? uint96(x) : uint96(-x);
   }
 
   /**
