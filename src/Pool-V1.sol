@@ -76,7 +76,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     lastPoolTimestamp = block.timestamp;
     poolByTimestamp[block.timestamp].timestamp = block.timestamp;
 
-    bytes memory data = callInternal(abi.encodeWithSignature("_createBalanceTreasuryTask()"));
+    bytes memory data = delegateCallPoolInternal(abi.encodeWithSignature("_createBalanceTreasuryTask()"));
 
     balanceTreasuryTask = abi.decode(data, (bytes32)); // createBalanceTreasuryTask();
   }
@@ -136,7 +136,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     require(amount > 0, "AMOUNT_TO_BE_POSITIVE");
 
     if (from != poolStrategy) {
-    callInternal(abi.encodeWithSignature("_tokensReceived(address,uint256)", from, amount));
+    delegateCallPoolInternal(abi.encodeWithSignature("_tokensReceived(address,uint256)", from, amount));
     emitEvents(from);
     emit Events.SupplierEvent(DataTypes.SupplierEvent.DEPOSIT, abi.encode(amount), block.timestamp, from);
     }
@@ -148,7 +148,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    */
   function redeemDeposit(uint256 redeemAmount) external override onlyNotEmergency {
     address _supplier = msg.sender;
-    callInternal(abi.encodeWithSignature("_redeemDeposit(address,uint256)", _supplier, redeemAmount));
+    delegateCallPoolInternal(abi.encodeWithSignature("_redeemDeposit(address,uint256)", _supplier, redeemAmount));
     emitEvents(_supplier);
     emit Events.SupplierEvent(DataTypes.SupplierEvent.WITHDRAW, abi.encode(redeemAmount), block.timestamp, _supplier);
   }
@@ -169,7 +169,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
       DataTypes.SupplierEvent.OUT_STREAM_UPDATE :
       DataTypes.SupplierEvent.OUT_STREAM_START;
 
-    callInternal(abi.encodeWithSignature("_redeemFlow(address,int96)", _supplier, _outFlowRate));
+    delegateCallPoolInternal(abi.encodeWithSignature("_redeemFlow(address,int96)", _supplier, _outFlowRate));
 
     emitEvents(_supplier);
 
@@ -180,7 +180,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     (uint256 fee,) = IOps(ops).getFeeDetails();
 
     transferToGelato(fee);
-    callInternal(abi.encodeWithSignature("closeStreamFlow(address)", _supplier));
+    delegateCallPoolInternal(abi.encodeWithSignature("closeStreamFlow(address)", _supplier));
   }
 
   /**
@@ -191,7 +191,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     address _supplier = msg.sender;
     require(suppliersByAddress[_supplier].outStream.flow > 0, "OUT_STREAM_NOT_EXISTS");
 
-    callInternal(abi.encodeWithSignature("_redeemFlowStop(address)", _supplier));
+    delegateCallPoolInternal(abi.encodeWithSignature("_redeemFlowStop(address)", _supplier));
 
     emitEvents(_supplier);
     emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, abi.encode(""), block.timestamp, _supplier);
@@ -202,7 +202,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    *
    */
   function closeAccount() external {
-    callInternal(abi.encodeWithSignature("_closeAccount(address)", msg.sender));
+    delegateCallPoolInternal(abi.encodeWithSignature("_closeAccount(address)", msg.sender));
   }
 
   // #endregion User Interaction PoolEvents
@@ -260,7 +260,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
       emitEvents(sender);
       emit Events.SupplierEvent(DataTypes.SupplierEvent.STREAM_STOP, abi.encode(""), block.timestamp, sender);
     } else if (sender == address(this)) {
-      callInternal(abi.encodeWithSignature("_redeemFlowStop(address)", receiver));
+      delegateCallPoolInternal(abi.encodeWithSignature("_redeemFlowStop(address)", receiver));
       emitEvents(receiver);
       emit Events.SupplierEvent(DataTypes.SupplierEvent.OUT_STREAM_STOP, abi.encode(""), block.timestamp, receiver);
     }
@@ -269,7 +269,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   
 
   function _updateStreamRecord(bytes memory newCtx, int96 inFlowRate, address sender) internal returns (bytes memory updateCtx) {
-    bytes memory data = callInternal(abi.encodeWithSignature("_updateSupplierFlow(address,int96,int96,bytes)", sender, inFlowRate, 0, newCtx));
+    bytes memory data = delegateCallPoolInternal(abi.encodeWithSignature("_updateSupplierFlow(address,int96,int96,bytes)", sender, inFlowRate, 0, newCtx));
 
     updateCtx = abi.decode(data, (bytes));
   }
@@ -299,7 +299,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
     transferToGelato(fee);
 
-    callInternal(abi.encodeWithSignature("_balanceTreasuryFromGelato()"));
+    delegateCallPoolInternal(abi.encodeWithSignature("_balanceTreasuryFromGelato()"));
   }
 
   function checkerLastExecution() external view returns (bool canExec, bytes memory execPayload) {
@@ -316,7 +316,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
   // #region ============ ===============  Internal && Pool Internal Functions   ============= ============= //
 
-  function callInternal(bytes memory payload) internal returns (bytes memory) {
+  function delegateCallPoolInternal(bytes memory payload) internal returns (bytes memory) {
     (bool success, bytes memory data) = poolInternal.delegatecall(payload);
 
     if (!success) {
@@ -424,7 +424,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
 
     require(balanceOf(from) >= amount, "NOT_ENOUGH_BALANCE");
 
-    callInternal(abi.encodeWithSignature("transferSPTokens(address,address,uint256)", from, to, amount));
+    delegateCallPoolInternal(abi.encodeWithSignature("transferSPTokens(address,address,uint256)", from, to, amount));
 
     emit Transfer(from, to, amount);
 
