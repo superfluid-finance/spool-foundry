@@ -159,7 +159,7 @@ contract PoolInternalV1 is PoolStateV1 {
 
     DataTypes.Pool memory pool = poolByTimestamp[block.timestamp];
     uint256 yieldSupplier = totalYieldEarnedSupplier(_supplier, IPoolStrategyV1(poolStrategy).balanceOf());
-    uint256 flow = 0;
+    uint256 flow;
     uint256 multiplier = PRECISION * (block.timestamp - supplier.timestamp);
 
       if (supplier.inStream > 0) {
@@ -203,7 +203,7 @@ contract PoolInternalV1 is PoolStateV1 {
       uint96 flow = uint96(supplier.outStream.flow);
       if (outDeposit > 0) {
         uint256 balance = _getSupplierBalance(_supplier) / PRECISION - outDeposit;
-        uint256 outFlowBuffer = POOL_BUFFER * uint96(supplier.outStream.flow);
+        uint256 outFlowBuffer = POOL_BUFFER * flow;
         uint256 initialWithdraw = SUPERFLUID_DEPOSIT * flow;
         uint256 streamDuration =  (balance - (outFlowBuffer + initialWithdraw)) / flow;
 
@@ -253,9 +253,7 @@ contract PoolInternalV1 is PoolStateV1 {
    */
   function _updateSupplierFlow(address _supplier, int96 inFlow, int96 outFlow, bytes memory _ctx) public returns (bytes memory newCtx) {
     newCtx = _ctx;
-
     _poolUpdate();
-
     _supplierUpdateCurrentState(_supplier);
 
     DataTypes.Supplier memory supplier = suppliersByAddress[_supplier];
@@ -268,9 +266,9 @@ contract PoolInternalV1 is PoolStateV1 {
       /// PREVIOUS FLOW NEGATIVE AND CURRENT FLOW POSITIVE
 
       if (newNetFlow >= 0) {
-        pool.outFlowRate = pool.outFlowRate + currentNetFlow;
+        pool.outFlowRate += currentNetFlow;
 
-        pool.inFlowRate = pool.inFlowRate + newNetFlow;
+        pool.inFlowRate += newNetFlow;
 
         ///// refactor logic
         if (newNetFlow == 0) {
