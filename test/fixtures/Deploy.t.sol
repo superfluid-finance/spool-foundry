@@ -4,7 +4,10 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import { ISuperfluid, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+  ISuperfluid,
+  ISuperToken
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 
 import { PoolV1 } from "../../src/Pool-V1.sol";
 import { IPoolV1 } from "../../src/interfaces/IPool-V1.sol";
@@ -28,52 +31,37 @@ import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { Config } from "./Config.sol";
 
 abstract contract DeployPool is Test, Config {
-  PoolV1 poolImpl;
+  PoolV1 poolLogic;
 
-  PoolInternalV1 poolInternal;
+  PoolInternalV1 poolInternalLogic;
 
-  PoolStrategyV1 poolStrategyImpl;
+  PoolStrategyV1 poolStrategyLogic;
 
-  SuperPoolFactory poolFactoryImpl;
-  UUPSProxy poolFactoryProxy;
+  SuperPoolFactory poolFactoryLogic;
 
   constructor() { }
 
   function deploy() public {
     vm.startBroadcast();
 
-    poolImpl = new PoolV1();
+    poolLogic = new PoolV1();
 
-    poolInternal = new PoolInternalV1();
+    poolInternalLogic = new PoolInternalV1();
 
-    poolStrategyImpl = new PoolStrategyV1();
+    poolStrategyLogic = new PoolStrategyV1();
 
-    strategyProxy = new UUPSProxy();
+    DataTypes.SuperPoolFactoryInitializer memory factoryInitialize =
+      DataTypes.SuperPoolFactoryInitializer(host, address(poolLogic), address(poolInternalLogic), ops);
 
-    strategyProxy.initializeProxy(address(poolStrategyImpl));
+    poolFactoryLogic = new SuperPoolFactory(factoryInitialize);
 
-    poolFactoryImpl = new SuperPoolFactory();
+    address poolAddress = ISuperPoolFactory(address(poolFactoryLogic)).createSuperPool(
+      DataTypes.CreatePoolInput(address(superToken), address(poolStrategyLogic), token, aavePool, aToken, aaveToken)
+    );
 
-    poolFactoryProxy = new UUPSProxy();
+    poolProxy = PoolV1(payable(poolAddress));
 
-    poolFactoryProxy.initializeProxy(address(poolFactoryImpl));
-
-    DataTypes.SuperPoolFactoryInitializer memory factoryInitialize = DataTypes.SuperPoolFactoryInitializer(host, address(poolImpl), address(poolInternal), ops);
-
-    ISuperPoolFactory(address(poolFactoryProxy)).initialize(factoryInitialize);
-
-    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(DataTypes.CreatePoolInput(
-      address(superToken),
-      address(strategyProxy),
-      token,
-      aavePool,
-      aToken,
-      aaveToken
-    ));
-
-    poolInfo = ISuperPoolFactory(address(poolFactoryProxy)).getRecordBySuperTokenAddress(address(superToken), address(strategyProxy));
-
-    poolProxy = PoolV1(payable(poolInfo.pool));
+    strategyProxy = UUPSProxy(payable(poolProxy.poolStrategy()));
 
     string memory line1 = string(abi.encodePacked('{"pool":"', vm.toString(address(poolProxy)), '"}'));
     vm.writeFile("./test/addresses.json", line1);

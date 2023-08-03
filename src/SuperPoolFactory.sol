@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { ISuperfluid, ISuperToken, ISuperApp, SuperAppDefinitions } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import { ERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {
+  ISuperfluid,
+  ISuperToken,
+  ISuperApp,
+  SuperAppDefinitions
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import { ISuperPoolFactory } from "./interfaces/ISuperPoolFactory.sol";
 import { UUPSProxy } from "./upgradability/UUPSProxy.sol";
 import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
 import { IUUPSProxiable } from "./upgradability/IUUPSProxiable.sol";
@@ -15,130 +21,74 @@ import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
 import { ERC20mintable } from "./interfaces/ERC20mintable.sol";
 import { IPool } from "./aave/IPool.sol";
 
+contract SuperPoolFactory is ISuperPoolFactory {
+  ISuperfluid public immutable host;
+  IOps public ops;
+  address public owner;
+  address public poolLogic;
+  address public poolInternalLogic;
 
-contract SuperPoolFactory is Initializable, UUPSProxiable {
+  // pool address => poolInfo
+  mapping(address => DataTypes.PoolInfo) public poolAddressToPoolInfo;
 
-  uint256 public nrPools;
+  error POOL_ALREADY_EXISTS();
 
-  ISuperfluid host;
-  IOps ops;
-  address owner;
-  address poolImpl;
-  address poolInternalImpl;
-
-  mapping(address => mapping(address => uint256)) public poolIdBySuperTokenStrategy;
-
-  mapping(address => uint256) nrStrategiesPerSuperToken;
-
-  mapping(address => mapping(uint256 => uint256)) public poolIdBySuperTokenAndId;
-
-  mapping(uint256 => DataTypes.PoolInfo) public poolInfoById;
-
-  /**
-   * @notice initializer of the Pool Factory
-   */
-  function initialize(DataTypes.SuperPoolFactoryInitializer memory factoryInitializer) external initializer {
-    
+  constructor(DataTypes.SuperPoolFactoryInitializer memory factoryInitializer) {
     host = factoryInitializer.host;
     ops = factoryInitializer.ops;
-    poolImpl = factoryInitializer.poolImpl;
-    poolInternalImpl = factoryInitializer.poolInternalImpl;
+    poolLogic = factoryInitializer.poolLogic;
+    poolInternalLogic = factoryInitializer.poolInternalLogic;
     owner = msg.sender;
   }
 
-  function createSuperPool(
-    DataTypes.CreatePoolInput memory poolInput
-  ) external {
-    DataTypes.PoolInfo memory existsPool = poolInfoById[poolIdBySuperTokenStrategy[poolInput.superToken][poolInput.poolStrategy]];
-    require(existsPool.pool == address(0), "POOL_EXISTS");
-    nrPools++;
-    nrStrategiesPerSuperToken[poolInput.superToken] = nrStrategiesPerSuperToken[poolInput.superToken] + 1;
-
-    uint256 poolNrBysuperToken = nrStrategiesPerSuperToken[poolInput.superToken];
-
-
+  function createSuperPool(DataTypes.CreatePoolInput memory poolInput) external override returns (address poolAddress) {
     ISuperToken superToken = ISuperToken(poolInput.superToken);
-    ERC20 token = ERC20(superToken.getUnderlyingToken());
-    string memory tokenName = token.name();
-    string memory symbol = token.symbol();
-  
+
     UUPSProxy poolProxy = new UUPSProxy();
-    poolProxy.initializeProxy(poolImpl);
+    poolProxy.initializeProxy(poolLogic);
+
+    UUPSProxy poolStrategyProxy = new UUPSProxy();
+    poolStrategyProxy.initializeProxy(poolInput.poolStrategyLogic);
+    address poolStrategyProxyAddress = address(poolStrategyProxy);
+
+    poolAddress = address(poolProxy);
+
+    ERC20 token = ERC20(superToken.getUnderlyingToken());
 
     // initializer Pool
     DataTypes.PoolInitializer memory poolInit;
     poolInit = DataTypes.PoolInitializer({
-      id: nrPools,
-      name: string(abi.encodePacked("Super Pool ", tokenName)),
-      symbol: string(abi.encodePacked("sp", symbol)),
+      name: string(abi.encodePacked("Super Pool ", token.name())),
+      symbol: string(abi.encodePacked("sp", token.symbol())),
       host: host,
-      superToken: ISuperToken(poolInput.superToken),
+      superToken: superToken,
       token: token,
-      poolInternal: poolInternalImpl,
-      poolStrategy: IPoolStrategyV1(poolInput.poolStrategy),
+      poolInternal: poolInternalLogic,
+      poolStrategy: IPoolStrategyV1(poolStrategyProxyAddress),
       ops: ops,
       owner: msg.sender
     });
 
-    IPoolV1(address(poolProxy)).initialize(poolInit);
+    IPoolV1(poolAddress).initialize(poolInit);
 
     // initialize strategy
-    IPoolStrategyV1(poolInput.poolStrategy).initialize(
-      ISuperToken(poolInput.superToken),
-      poolInput._token,
-      IPoolV1(address(poolProxy)),
-      poolInput._aavePool,
-      poolInput._aToken,
-      poolInput._aaveToken
+    IPoolStrategyV1(poolStrategyProxyAddress).initialize(
+      superToken, poolInput._token, IPoolV1(poolAddress), poolInput._aavePool, poolInput._aToken, poolInput._aaveToken
     );
 
-    uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL | 
-      SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP | 
-      SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP | 
-      SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP;
+    // register super app
+    uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL | SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP
+      | SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP | SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP;
 
-    host.registerAppByFactory(ISuperApp(address(poolProxy)), configWord);
+    host.registerAppByFactory(ISuperApp(poolAddress), configWord);
 
     // initializer PoolInternal
     DataTypes.PoolInfo memory poolInfo = DataTypes.PoolInfo({
-      id: nrPools,
-      idPerSupertoken: poolNrBysuperToken,
       superToken: poolInput.superToken,
-      strategy: poolInput.poolStrategy,
-      pool: address(poolProxy), poolInternal: poolInternalImpl
+      strategy: poolStrategyProxyAddress,
+      poolInternal: poolInternalLogic
     });
-    poolInfoById[poolInfo.id] = poolInfo;
-    poolIdBySuperTokenStrategy[poolInput.superToken][poolInput.poolStrategy] = poolInfo.id;
-    poolIdBySuperTokenAndId[poolInput.superToken][poolNrBysuperToken] = poolInfo.id;
-  }
-
-
-  function changePoolImplementation(address newImpl, address superToken, address poolStrategy) external onlyOwner {
-    uint256 poolId = poolIdBySuperTokenStrategy[superToken][poolStrategy];
-    DataTypes.PoolInfo memory poolInfo = poolInfoById[poolId];
-    IUUPSProxiable(poolInfo.pool).updateCode(newImpl);
-    poolImpl = newImpl;
-  }
-
-  function changePoolInternalImplementation(address newImpl, address superToken, address poolStrategy) external onlyOwner {
-    uint256 poolId = poolIdBySuperTokenStrategy[superToken][poolStrategy];
-    DataTypes.PoolInfo memory poolInfo = poolInfoById[poolId];
-    IUUPSProxiable(poolInfo.poolInternal).updateCode(newImpl);
-    poolInternalImpl = newImpl;
-  }
-
-  function proxiableUUID() public pure override returns (bytes32) {
-    return keccak256("org.super-pool.pool-factory.v2");
-  }
-
-  function updateCode(address newAddress) external override {
-    require(msg.sender == owner, "only owner can update code");
-    return _updateCodeAddress(newAddress);
-  }
-
-  function getRecordBySuperTokenAddress(address _superToken, address _poolStrategy) external view returns (DataTypes.PoolInfo memory poolInfo) {
-    uint256 poolId = poolIdBySuperTokenStrategy[_superToken][_poolStrategy];
-    poolInfo = poolInfoById[poolId];
+    poolAddressToPoolInfo[poolAddress] = poolInfo;
   }
 
   function getVersion() external pure returns (uint256) {

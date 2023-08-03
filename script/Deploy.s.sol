@@ -5,7 +5,10 @@ import "forge-std/Script.sol";
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import { ISuperfluid, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+  ISuperfluid,
+  ISuperToken
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 
 import { PoolV1 } from "../src/Pool-V1.sol";
 import { IPoolV1 } from "../src/interfaces/IPool-V1.sol";
@@ -37,52 +40,39 @@ contract DeployScript is Script {
   IERC20 aToken = IERC20(0x1Ee669290939f8a8864497Af3BC83728715265FF);
   ERC20mintable aaveToken = ERC20mintable(0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43);
 
-  PoolV1 poolImpl;
+  PoolV1 poolLogic;
 
-  PoolInternalV1 poolInternal;
+  PoolInternalV1 poolInternalLogic;
 
-  PoolStrategyV1 poolStrategyImpl;
+  PoolStrategyV1 poolStrategyLogic;
   UUPSProxy strategyProxy;
 
-  SuperPoolFactory poolFactoryImpl;
+  SuperPoolFactory poolFactoryLogic;
   UUPSProxy poolFactoryProxy;
 
   function setUp() public { }
 
   function run() public {
     vm.startBroadcast();
-    poolImpl = new PoolV1();
 
-    poolInternal = new PoolInternalV1();
+    poolLogic = new PoolV1();
 
-    poolStrategyImpl = new PoolStrategyV1();
+    poolInternalLogic = new PoolInternalV1();
 
-    strategyProxy = new UUPSProxy();
+    poolStrategyLogic = new PoolStrategyV1();
 
-    strategyProxy.initializeProxy(address(poolStrategyImpl));
+    DataTypes.SuperPoolFactoryInitializer memory factoryInitialize =
+      DataTypes.SuperPoolFactoryInitializer(host, address(poolLogic), address(poolInternalLogic), ops);
 
-    poolFactoryImpl = new SuperPoolFactory();
+    poolFactoryLogic = new SuperPoolFactory(factoryInitialize);
 
     poolFactoryProxy = new UUPSProxy();
 
-    poolFactoryProxy.initializeProxy(address(poolFactoryImpl));
+    poolFactoryProxy.initializeProxy(address(poolFactoryLogic));
 
-    DataTypes.SuperPoolFactoryInitializer memory factoryInitialize = DataTypes.SuperPoolFactoryInitializer(host, address(poolImpl), address(poolInternal), ops);
-
-    ISuperPoolFactory(address(poolFactoryProxy)).initialize(factoryInitialize);
-
-    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(DataTypes.CreatePoolInput(
-      address(superToken),
-      address(strategyProxy),
-      token,
-      aavePool,
-      aToken,
-      aaveToken
-    ));
-
-    DataTypes.PoolInfo memory poolInfo = ISuperPoolFactory(address(poolFactoryProxy)).getRecordBySuperTokenAddress(address(superToken), address(strategyProxy));
-
-    address poolProxy = poolInfo.pool;
+    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(
+      DataTypes.CreatePoolInput(address(superToken), address(poolStrategyLogic), token, aavePool, aToken, aaveToken)
+    );
 
     vm.stopBroadcast();
   }

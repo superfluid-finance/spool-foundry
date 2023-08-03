@@ -11,7 +11,7 @@ fs_permissions = [{ access = "read-write", path = "./test"}]
 runs = 10000
 
 [fmt]
-line_length = 300
+line_length = 120
 tab_width = 2
 bracket_spacing = true
 
