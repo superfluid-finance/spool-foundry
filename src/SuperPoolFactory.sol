@@ -10,15 +10,10 @@ import {
 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { ISuperPoolFactory } from "./interfaces/ISuperPoolFactory.sol";
 import { UUPSProxy } from "./upgradability/UUPSProxy.sol";
-import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
-import { IUUPSProxiable } from "./upgradability/IUUPSProxiable.sol";
 import { IPoolV1 } from "./interfaces/IPool-V1.sol";
-import { PoolV1 } from "./Pool-V1.sol";
 import { IOps } from "./gelato/IOps.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
-import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
-import { ERC20mintable } from "./interfaces/ERC20mintable.sol";
 import { IPool } from "./aave/IPool.sol";
 
 contract SuperPoolFactory is ISuperPoolFactory {

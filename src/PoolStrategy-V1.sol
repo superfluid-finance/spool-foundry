@@ -22,7 +22,6 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
  *
  */
 contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
-
   address owner;
 
   ISuperToken superToken;
@@ -36,9 +35,14 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
   ERC20mintable token; // SUPERFLUID Faketoken
   ERC20mintable aaveToken; // AAVE Fake token
 
-  constructor() { }
-
-  function initialize(ISuperToken _superToken, ERC20mintable _token, IPoolV1 _pool, IPool _aavePool, IERC20 _aToken, ERC20mintable _aaveToken) external initializer {
+  function initialize(
+    ISuperToken _superToken,
+    ERC20mintable _token,
+    IPoolV1 _pool,
+    IPool _aavePool,
+    IERC20 _aToken,
+    ERC20mintable _aaveToken
+  ) external initializer {
     owner = msg.sender;
     superToken = _superToken;
     token = _token;
