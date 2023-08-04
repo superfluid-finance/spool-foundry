@@ -26,7 +26,7 @@ contract SuperPoolFactory is ISuperPoolFactory {
   // pool address => poolInfo
   mapping(address => DataTypes.PoolInfo) public poolAddressToPoolInfo;
 
-  error POOL_ALREADY_EXISTS();
+  error NOT_OWNER();
 
   constructor(DataTypes.SuperPoolFactoryInitializer memory factoryInitializer) {
     host = factoryInitializer.host;
@@ -91,7 +91,7 @@ contract SuperPoolFactory is ISuperPoolFactory {
   }
 
   modifier onlyOwner() {
-    require(msg.sender == owner, "Only Owner");
+    if(msg.sender != owner) revert NOT_OWNER();
     _;
   }
 }
