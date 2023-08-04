@@ -68,7 +68,7 @@ contract SuperPoolFactory is ISuperPoolFactory {
 
     // initialize strategy
     IPoolStrategyV1(poolStrategyProxyAddress).initialize(
-      superToken, poolInput._token, IPoolV1(poolAddress), poolInput._aavePool, poolInput._aToken, poolInput._aaveToken
+      superToken, poolInput.token, IPoolV1(poolAddress), poolInput.aavePool, poolInput.aToken, poolInput.aaveToken
     );
 
     // register super app

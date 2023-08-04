@@ -33,10 +33,10 @@ library DataTypes {
   struct CreatePoolInput {
     address superToken;
     address poolStrategyLogic;
-    ERC20mintable _token;
-    IPool _aavePool;
-    IERC20 _aToken;
-    ERC20mintable _aaveToken;
+    ERC20mintable token;
+    IPool aavePool;
+    IERC20 aToken;
+    ERC20mintable aaveToken;
   }
 
   struct PoolInitializer {
