@@ -2,31 +2,21 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import {
   ISuperfluid,
   ISuperToken
 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-
 import { PoolV1 } from "../src/Pool-V1.sol";
 import { IPoolV1 } from "../src/interfaces/IPool-V1.sol";
 import { ISuperPoolFactory } from "../src/interfaces/ISuperPoolFactory.sol";
-
 import { PoolInternalV1 } from "../src/PoolInternal-V1.sol";
-
 import { PoolStrategyV1 } from "../src/PoolStrategy-V1.sol";
 import { IPoolStrategyV1 } from "../src/interfaces/IPoolStrategy-V1.sol";
 import { ERC20mintable } from "../src/interfaces/ERC20mintable.sol";
-
 import { SuperPoolFactory } from "../src/SuperPoolFactory.sol";
-import { UUPSProxy } from "../src/upgradability/UUPSProxy.sol";
-
 import { IPool } from "../src/aave/IPool.sol";
-
 import { IOps } from "../src/gelato/IOps.sol";
-
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 contract DeployScript is Script {
@@ -45,10 +35,8 @@ contract DeployScript is Script {
   PoolInternalV1 poolInternalLogic;
 
   PoolStrategyV1 poolStrategyLogic;
-  UUPSProxy strategyProxy;
 
   SuperPoolFactory poolFactoryLogic;
-  UUPSProxy poolFactoryProxy;
 
   function setUp() public { }
 
@@ -66,11 +54,7 @@ contract DeployScript is Script {
 
     poolFactoryLogic = new SuperPoolFactory(factoryInitialize);
 
-    poolFactoryProxy = new UUPSProxy();
-
-    poolFactoryProxy.initializeProxy(address(poolFactoryLogic));
-
-    ISuperPoolFactory(address(poolFactoryProxy)).createSuperPool(
+    ISuperPoolFactory(address(poolFactoryLogic)).createSuperPool(
       DataTypes.CreatePoolInput(address(superToken), address(poolStrategyLogic), token, aavePool, aToken, aaveToken)
     );
 

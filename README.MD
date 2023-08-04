@@ -46,6 +46,19 @@ forge test --fork-url <RPC_URL> --fork-block-number 7850256 -vv
 
 > NOTE: You MUST use block 7850256.
 
+## Deployment
+
+To deploy, you can simply run the following command:
+
+```
+forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast --verify -vvvv
+```
+
+The steps are: 
+- deploy logic contracts for the pool, pool internal and pool strategy contracts
+- deploy the super pool factory
+- create a super pool using the factory
+
 ###  Super Pool Factory
 
 The contract is responsible for creating the pools, it creates proxies of the pool and pool internal implementation and initializes them. 
