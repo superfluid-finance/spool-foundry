@@ -14,6 +14,9 @@ import { PoolStateV1 } from "./PoolState-V1.sol";
 
 contract PoolInternalV1 is PoolStateV1 {
   using SuperTokenV1Library for ISuperToken;
+  
+  error NOT_ENOUGH_BALANCE();
+  error NOT_ENOUGH_BALANCE_WITH_OUTFLOW();
 
   // #region =========== =============  Pool Events (supplier interaction) ============= ============= //
 
@@ -133,13 +136,9 @@ contract PoolInternalV1 is PoolStateV1 {
     DataTypes.Supplier memory supplier = suppliersByAddress[_supplier];
     uint256 yieldSupplier = totalYieldEarnedSupplier(_supplier, IPoolStrategyV1(poolStrategy).balanceOf());
     int96 netFlow = supplier.inStream - supplier.outStream.flow;
-    uint256 flowProduct = uint96(_abs(netFlow)) * (block.timestamp - supplier.timestamp) * PRECISION;
+    uint96 netFlowAbs = netFlow >= 0 ? uint96(netFlow) : uint96(-netFlow);
+    uint256 flowProduct = netFlowAbs * (block.timestamp - supplier.timestamp) * PRECISION;
     return netFlow >= 0 ? yieldSupplier + supplier.deposit + flowProduct : yieldSupplier + supplier.deposit - flowProduct;
-  }
-
-  // helper function to calculate absolute value of int96
-  function _abs(int96 x) internal pure returns (uint96) {
-    return x >= 0 ? uint96(x) : uint96(-x);
   }
 
   /**
@@ -601,35 +600,6 @@ contract PoolInternalV1 is PoolStateV1 {
   }
 
   // #endregion ====================  Gelato Cancel ====================
-
-  // #region =========== =============  Modifiers ============= ============= //
-
-  modifier onlyPool() {
-    require(msg.sender == address(this), "Only Pool");
-    _;
-  }
-
-  modifier onlyPoolStrategy() {
-    require(msg.sender == address(poolStrategy), "Only Strategy");
-    _;
-  }
-
-  modifier onlyOps() {
-    require(msg.sender == address(ops), "OpsReady: onlyOps");
-    _;
-  }
-
-  modifier onlyOwner() {
-    require(msg.sender == owner, "Only Owner");
-    _;
-  }
-
-  modifier onlyOwnerOrPoolFactory() {
-    require(msg.sender == poolFactory || msg.sender == owner, "Only Host");
-    _;
-  }
-
-  // #endregion =========== =============  Modifiers ============= ============= //
 
   //// TO BE REFACTOR SO FAR REDUNDANT
 

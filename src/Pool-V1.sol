@@ -40,6 +40,24 @@ import { Events } from "./libraries/Events.sol";
 contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC777Recipient, IPoolV1, IERC20 {
   using SuperTokenV1Library for ISuperToken;
 
+  error INVALID_TOKEN();
+  error AMOUNT_TO_BE_POSITIVE();
+  error FLOWRATE_SHOULD_BE_GREATER_THAN_ZERO();
+  error NO_BALANCE();
+  error OUT_STREAM_NOT_EXISTS();
+  error NOT_YET_READY();
+  error NOT_CONDITIONS();
+  error ONLY_OPS();
+  error ONLY_OWNER();
+  error ONLY_FACTORY_OR_OWNER();
+  error PAUSED();
+  error NOT_ENOUGH_BALANCE();
+  error FAILED_DELEGATECALL();
+  error ZERO_ADDRESS_TRANSFER();
+  error NEGATIVE_ALLOWANCE();
+  error ZERO_ADDRESS_MINT();
+  error ZERO_ADDRESS_BURN();
+  error INSUFFICIENT_ALLOWANCE();
   /**
    * @notice initializer of the Pool
    */
@@ -132,8 +150,8 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    * @param amount amount received
    */
   function tokensReceived(address, address from, address, uint256 amount, bytes calldata, bytes calldata) external override (IERC777Recipient, IPoolV1) onlyNotEmergency {
-    require(msg.sender == address(superToken), "INVALID_TOKEN");
-    require(amount > 0, "AMOUNT_TO_BE_POSITIVE");
+    if (msg.sender != address(superToken)) revert INVALID_TOKEN();
+    if (amount <= 0) revert AMOUNT_TO_BE_POSITIVE();
 
     if (from != poolStrategy) {
     delegateCallPoolInternal(abi.encodeWithSignature("_tokensReceived(address,uint256)", from, amount));
@@ -160,10 +178,10 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    *    This method can be called to create a stream or update a previous one
    */
   function redeemFlow(int96 _outFlowRate) external onlyNotEmergency {
-    require(_outFlowRate > 0, "FLOWRATE_SHOULD_BE_GREATER_THAN_ZERO");
+    if (_outFlowRate <= 0) revert FLOWRATE_SHOULD_BE_GREATER_THAN_ZERO();
     address _supplier = msg.sender;
     uint256 realTimeBalance = balanceOf(_supplier);
-    require(realTimeBalance > 0, "NO_BALANCE");
+    if (realTimeBalance <= 0) revert NO_BALANCE();
 
     DataTypes.SupplierEvent flowEvent = suppliersByAddress[_supplier].outStream.flow > 0 ?
       DataTypes.SupplierEvent.OUT_STREAM_UPDATE :
@@ -189,7 +207,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
    */
   function redeemFlowStop() external onlyNotEmergency {
     address _supplier = msg.sender;
-    require(suppliersByAddress[_supplier].outStream.flow > 0, "OUT_STREAM_NOT_EXISTS");
+    if (suppliersByAddress[_supplier].outStream.flow <= 0) revert OUT_STREAM_NOT_EXISTS();
 
     delegateCallPoolInternal(abi.encodeWithSignature("_redeemFlowStop(address)", _supplier));
 
@@ -287,13 +305,13 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   // #region ============ ===============  BALANCE RREASURY =========== ==============
 
   function balanceTreasury() external onlyOps onlyNotEmergency {
-    require(block.timestamp >= lastExecution + BALANCE_TRIGGER_TIME, "NOT_YET_READY");
+    if(block.timestamp < lastExecution + BALANCE_TRIGGER_TIME) revert NOT_YET_READY();
 
     DataTypes.Pool memory pool = poolByTimestamp[lastPoolTimestamp];
 
     uint256 poolBalance = superToken.balanceOf(address(this));
 
-    require(pool.outFlowRate > 0 || poolBalance > DEPOSIT_TRIGGER_AMOUNT, "NOT_CONDITIONS");
+    if (pool.outFlowRate <= 0 && poolBalance <= DEPOSIT_TRIGGER_AMOUNT) revert NOT_CONDITIONS();
 
     (uint256 fee,) = IOps(ops).getFeeDetails();
 
@@ -378,22 +396,22 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
   }
 
   modifier onlyOps() {
-    require(msg.sender == address(ops), "OpsReady: onlyOps");
+    if (msg.sender != address(ops)) revert ONLY_OPS();
     _;
   }
 
   modifier onlyOwnerOrPoolFactory() {
-    require(msg.sender == poolFactory || msg.sender == owner, "Only Factory or owner");
+    if (msg.sender != poolFactory && msg.sender != owner) revert ONLY_FACTORY_OR_OWNER();
     _;
   }
 
   modifier onlyOwner() {
-    require(msg.sender == owner, "Only Owner");
+    if (msg.sender != owner) revert ONLY_OWNER();
     _;
   }
 
   modifier onlyNotEmergency() {
-    require(emergency == false, "PAUSED");
+    if (emergency != false) revert PAUSED();
     _;
   }
 

@@ -6,6 +6,7 @@ import { DeployPool } from "./fixtures/Deploy.t.sol";
 import { Users } from "./fixtures/Users.t.sol";
 import { Report } from "./fixtures/Report.t.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
+import { PoolV1 } from "../src/Pool-V1.sol";
 
 contract PoolTest is Test, DeployPool, Report {
 
@@ -25,7 +26,7 @@ contract PoolTest is Test, DeployPool, Report {
 
     DataTypes.Pool memory currentPool;
 
-    vm.expectRevert(bytes("NO_BALANCE"));
+    vm.expectRevert(PoolV1.NO_BALANCE.selector);
     redeemFlow(user, flowRate);
 
     if (superToken.balanceOf(user) > uint256(uint96(flowRate)) * 4 * 60 * 60) {
@@ -168,7 +169,7 @@ contract PoolTest is Test, DeployPool, Report {
 
     uint256 initBalance = calculatePoolTotalBalance();
 
-    vm.expectRevert(bytes("NO_BALANCE"));
+    vm.expectRevert(PoolV1.NO_BALANCE.selector);
     redeemFlow(user, flowRate);
 
     startFlow(user, flowRate);
