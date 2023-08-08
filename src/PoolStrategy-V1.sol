@@ -7,7 +7,7 @@ import { IPoolStrategyV1 } from "./interfaces/IPoolStrategy-V1.sol";
 import { IPool } from "./aave/IPool.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { UUPSProxiable } from "./upgradability/UUPSProxiable.sol";
-import { ERC20mintable } from "./interfaces/ERC20mintable.sol";
+import { ERC20Mintable } from "./interfaces/ERC20Mintable.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 /**
@@ -32,16 +32,16 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
 
   ///// IN PRODUCTION WE WILL ONLY REQUIRE the token a ERC20
   ///// NOW WE NEED TO SWAP BETWEEN SUPERFLUID and AAVe FAKE TOKEN
-  ERC20mintable token; // SUPERFLUID Faketoken
-  ERC20mintable aaveToken; // AAVE Fake token
+  ERC20Mintable token; // SUPERFLUID Faketoken
+  ERC20Mintable aaveToken; // AAVE Fake token
 
   function initialize(
     ISuperToken _superToken,
-    ERC20mintable _token,
+    ERC20Mintable _token,
     IPoolV1 _pool,
     IPool _aavePool,
     IERC20 _aToken,
-    ERC20mintable _aaveToken
+    ERC20Mintable _aaveToken
   ) external initializer {
     owner = msg.sender;
     superToken = _superToken;
@@ -87,7 +87,9 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
 
     superToken.downgrade(amountToDeposit);
 
-    // COMMENT
+    // We are not actually using the streamed in SuperToken's for 
+    // the Aave pool, so we mint fake tokens to simulate the
+    // streamed in tokens
     aaveToken.mint(amountToDeposit / (10 ** 12));
 
     if (amountToDeposit / (10 ** 12) > 0) {

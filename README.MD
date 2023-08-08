@@ -51,6 +51,11 @@ forge test --fork-url <RPC_URL> --fork-block-number 7850256 -vv
 To deploy, you can simply run the following command:
 
 ```
+# To load the variables in the .env file
+
+source .env
+
+# To deploy and verify our contract
 forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast --verify -vvvv
 ```
 

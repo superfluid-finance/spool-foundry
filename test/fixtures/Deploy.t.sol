@@ -17,7 +17,7 @@ import { PoolInternalV1 } from "../../src/PoolInternal-V1.sol";
 
 import { PoolStrategyV1 } from "../../src/PoolStrategy-V1.sol";
 import { IPoolStrategyV1 } from "../../src/interfaces/IPoolStrategy-V1.sol";
-import { ERC20mintable } from "../../src/interfaces/ERC20mintable.sol";
+import { ERC20Mintable } from "../../src/interfaces/ERC20Mintable.sol";
 
 import { SuperPoolFactory } from "../../src/SuperPoolFactory.sol";
 import { UUPSProxy } from "../../src/upgradability/UUPSProxy.sol";

@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { ISuperfluid, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import { ERC20mintable } from "../../src/interfaces/ERC20mintable.sol";
+import { ERC20Mintable } from "../../src/interfaces/ERC20Mintable.sol";
 import { IPool } from "../../src/aave/IPool.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
 import { PoolV1 } from "../../src/Pool-V1.sol";

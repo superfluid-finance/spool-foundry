@@ -6,7 +6,12 @@ optimizer = true
 optimizer_runs = 1000
 solc = '0.8.17'
 fs_permissions = [{ access = "read-write", path = "./test"}]
-
+remappings = [
+    '@openzeppelin/=node_modules/@openzeppelin/',
+    '@superfluid-finance/ethereum-contracts/contracts/=node_modules/@superfluid-finance/ethereum-contracts/contracts/',
+    'ds-test/=lib/forge-std/lib/ds-test/src/',
+    'forge-std/=lib/forge-std/src/'
+]
 [fuzz]
 runs = 10000
 

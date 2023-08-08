@@ -13,42 +13,33 @@ import { ISuperPoolFactory } from "../src/interfaces/ISuperPoolFactory.sol";
 import { PoolInternalV1 } from "../src/PoolInternal-V1.sol";
 import { PoolStrategyV1 } from "../src/PoolStrategy-V1.sol";
 import { IPoolStrategyV1 } from "../src/interfaces/IPoolStrategy-V1.sol";
+import { ERC20Mintable } from "../src/interfaces/ERC20Mintable.sol";
 import { SuperPoolFactory } from "../src/SuperPoolFactory.sol";
 import { IPool } from "../src/aave/IPool.sol";
 import { IOps } from "../src/gelato/IOps.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 contract DeployScript is Script {
-  ISuperfluid host = ISuperfluid(0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9);
-  IOps ops = IOps(0xc1C6805B857Bef1f412519C4A842522431aFed39);
-
-  PoolV1 poolLogic;
-
-  PoolInternalV1 poolInternalLogic;
-
   PoolStrategyV1 poolStrategyLogic;
 
-  SuperPoolFactory poolFactoryLogic;
+  ISuperToken superToken = ISuperToken(0x8aE68021f6170E5a766bE613cEA0d75236ECCa9a);
+  ERC20Mintable token = ERC20Mintable(0xc94dd466416A7dFE166aB2cF916D3875C049EBB7);
+
+  IPool aavePool = IPool(0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6);
+  IERC20 aToken = IERC20(0x1Ee669290939f8a8864497Af3BC83728715265FF);
+  ERC20Mintable aaveToken = ERC20Mintable(0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43);
 
   function setUp() public { }
 
   function run() public {
-    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-    vm.startBroadcast(deployerPrivateKey);
+    // TODO use vm.env cheat code to pass in super pool factory address.
+    SuperPoolFactory poolFactoryLogic = SuperPoolFactory(0x5E4eE8ea9d1c7A7cCFb7dc8f0ba1B2bfF1ABFCF0);
+    vm.startBroadcast();
+    poolStrategyLogic = new PoolStrategyV1();
 
-    // deploy pool logic
-    poolLogic = new PoolV1();
-
-    // deplloy pool internal logic
-    poolInternalLogic = new PoolInternalV1();
-
-    // deploy pool strategy logic
-    // poolStrategyLogic = new PoolStrategyV1();
-
-    // deploy super pool factory
-    DataTypes.SuperPoolFactoryInitializer memory factoryInitialize =
-      DataTypes.SuperPoolFactoryInitializer(host, address(poolLogic), address(poolInternalLogic), ops);
-    poolFactoryLogic = new SuperPoolFactory(factoryInitialize);
+    ISuperPoolFactory(address(poolFactoryLogic)).createSuperPool(
+      DataTypes.CreatePoolInput(address(superToken), address(poolStrategyLogic), token, aavePool, aToken, aaveToken)
+    );
 
     vm.stopBroadcast();
   }

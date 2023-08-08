@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 
-import { ERC20mintable } from "../../src/interfaces/ERC20mintable.sol";
+import { ERC20Mintable } from "../../src/interfaces/ERC20Mintable.sol";
 
 import { IPool } from "../../src/aave/IPool.sol";
 import { DataTypes } from "../../src/libraries/DataTypes.sol";
