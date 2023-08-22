@@ -24,8 +24,6 @@ contract PoolTest is Test, DeployPool, Report {
     vm.assume(flowRate > 1000000000000);
     address user = user1;
 
-    DataTypes.Pool memory currentPool;
-
     vm.expectRevert(PoolV1.NO_BALANCE.selector);
     redeemFlow(user, flowRate);
 

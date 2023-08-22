@@ -19,8 +19,8 @@ import { IOps } from "../src/gelato/IOps.sol";
 import { DataTypes } from "../src/libraries/DataTypes.sol";
 
 contract DeployScript is Script {
-  ISuperfluid host = ISuperfluid(0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9);
-  IOps ops = IOps(0xc1C6805B857Bef1f412519C4A842522431aFed39);
+  ISuperfluid host = ISuperfluid(0xEB796bdb90fFA0f28255275e16936D25d3418603);
+  IOps ops = IOps(0xB3f5503f93d5Ef84b06993a1975B9D21B962892F);
 
   PoolV1 poolLogic;
 

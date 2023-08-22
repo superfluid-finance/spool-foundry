@@ -23,14 +23,14 @@ contract PoolStateV1 {
 
   // #region pool state
 
-  address owner;
-  address poolFactory;
+  address public owner;
+  address public poolFactory;
 
-  uint256 lastPoolTimestamp;
-  uint256 lastExecution;
+  uint256 public lastPoolTimestamp;
+  uint256 public lastExecution;
   //// TOKENS
-  ISuperToken superToken;
-  IERC20 token;
+  ISuperToken public superToken;
+  IERC20 public token;
 
   //// SUPERFLUID
 

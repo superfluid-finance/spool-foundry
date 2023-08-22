@@ -17,17 +17,25 @@ import { DataTypes } from "../src/libraries/DataTypes.sol";
 contract CreatePoolScript is Script {
   PoolStrategyV1 poolStrategyLogic;
 
-  ISuperToken superToken = ISuperToken(0x8aE68021f6170E5a766bE613cEA0d75236ECCa9a);
-  ERC20Mintable token = ERC20Mintable(0xc94dd466416A7dFE166aB2cF916D3875C049EBB7);
+  // the SuperToken that will be streamed/deposited into the pool
+  ISuperToken superToken = ISuperToken(0x42bb40bF79730451B11f6De1CbA222F17b87Afd7);
 
-  IPool aavePool = IPool(0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6);
-  IERC20 aUSDC = IERC20(0x1Ee669290939f8a8864497Af3BC83728715265FF);
-  ERC20Mintable aaveUSDC = ERC20Mintable(0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43);
+  // the underlying ERC20 token
+  ERC20Mintable token = ERC20Mintable(0xbe49ac1EadAc65dccf204D4Df81d650B50122aB2);
+
+  // the LendingPool contract
+  IPool aavePool = IPool(0x9198F13B08E299d85E096929fA9781A1E3d5d827);
+
+  // the aave interest bearing token
+  IERC20 aUSDC = IERC20(0x2271e3Fef9e15046d09E1d78a8FF038c691E9Cf9);
+
+  // the underlying token to be deposited in exchange for the aToken
+  ERC20Mintable aaveUSDC = ERC20Mintable(0x2058A9D7613eEE744279e3856Ef0eAda5FCbaA7e);
 
   function setUp() public { }
 
   function run() public {
-    SuperPoolFactory poolFactoryLogic = SuperPoolFactory(0xD0bfF41F0E12d9dcf116df0DDd84034A7A443609);
+    SuperPoolFactory poolFactoryLogic = SuperPoolFactory(0x363aDCAef5Aa628Dd81DCd1db8937217a62883D1);
     // get private key from env file
     uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     vm.startBroadcast(deployerPrivateKey);
