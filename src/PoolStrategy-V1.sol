@@ -24,16 +24,16 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
   address owner;
 
-  ISuperToken superToken;
-  IPoolV1 pool;
+  ISuperToken public superToken;
+  IPoolV1 public pool;
   /// Pool
-  IPool aavePool; //// aave Pool to deposit
-  IERC20 aToken; //// aToken received
+  IPool public aavePool; //// aave Pool to deposit
+  IERC20 public aToken; //// aToken received
 
   ///// IN PRODUCTION WE WILL ONLY REQUIRE the token a ERC20
   ///// NOW WE NEED TO SWAP BETWEEN SUPERFLUID and AAVe FAKE TOKEN
-  ERC20Mintable token; // SUPERFLUID Faketoken
-  ERC20Mintable aaveToken; // AAVE Fake token
+  ERC20Mintable public token; // SUPERFLUID Faketoken
+  ERC20Mintable public aaveToken; // AAVE Fake token
 
   function initialize(
     ISuperToken _superToken,
@@ -88,7 +88,7 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
     superToken.downgrade(amountToDeposit);
 
     uint256 formattedAmountToDeposit = amountToDeposit / (10 ** 12);
-    // We are not actually using the streamed in SuperToken's for 
+    // We are not actually using the streamed in SuperToken's for
     // the Aave pool, so we mint fake tokens to simulate the
     // streamed in tokens
     aaveToken.mint(formattedAmountToDeposit);
