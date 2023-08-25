@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { ISuperfluid, ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+  ISuperfluid,
+  ISuperToken
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { IConstantFlowAgreementV1 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
+import { IConstantFlowAgreementV1 } from
+  "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
 import { IOps } from "./gelato/IOps.sol";
 import { DataTypes } from "./libraries/DataTypes.sol";
 
@@ -42,29 +46,29 @@ contract PoolStateV1 {
 
   //// PARAMETERS
 
-  uint256 constant PRECISION = 1_000_000;
+  uint256 public constant PRECISION = 1_000_000;
 
-  uint256 constant SUPERFLUID_DEPOSIT = 4 * 3600;
-  uint256 constant POOL_BUFFER = 3600; // buffer to keep in the pool (outstream 4hours deposit) + outstream partial deposits
-  uint256 constant MIN_OUTFLOW_ALLOWED = 24 * 3600; // 1 hour minimum flow == Buffer
+  uint256 public constant SUPERFLUID_DEPOSIT = 4 * 3600;
+  uint256 public constant POOL_BUFFER = 3600; // buffer to keep in the pool (outstream 4hours deposit) + outstream partial deposits
+  uint256 public constant MIN_OUTFLOW_ALLOWED = 24 * 3600; // 1 hour minimum flow == Buffer
 
-  uint256 constant DEPOSIT_TRIGGER_AMOUNT = 100 ether;
-  uint256 constant BALANCE_TRIGGER_TIME = 24 * 3600;
+  uint256 public constant DEPOSIT_TRIGGER_AMOUNT = 100 ether;
+  uint256 public constant BALANCE_TRIGGER_TIME = 24 * 3600;
 
-  uint256 constant PROTOCOL_FEE = 3;
+  uint256 public constant PROTOCOL_FEE = 3;
 
   address public poolStrategy;
   address public poolInternal;
 
   /// POOL STATE
 
-  uint256 poolId;
-  uint256 supplierId;
+  uint256 public poolId;
+  uint256 public supplierId;
 
-  mapping(address => DataTypes.Supplier) suppliersByAddress;
+  mapping(address => DataTypes.Supplier) public suppliersByAddress;
 
-  mapping(uint256 => DataTypes.Pool) poolByTimestamp;
+  mapping(uint256 => DataTypes.Pool) public poolByTimestamp;
 
-  ISuperfluid host; // host
-  IConstantFlowAgreementV1 cfa; // the stored constant flow agreement class address
+  ISuperfluid public host; // host
+  IConstantFlowAgreementV1 public cfa; // the stored constant flow agreement class address
 }

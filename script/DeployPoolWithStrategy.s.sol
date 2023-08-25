@@ -35,13 +35,14 @@ contract CreatePoolScript is Script {
   function setUp() public { }
 
   function run() public {
-    SuperPoolFactory poolFactoryLogic = SuperPoolFactory(0x363aDCAef5Aa628Dd81DCd1db8937217a62883D1);
+    address poolFactoryAddress = vm.envAddress("POOL_FACTORY_ADDRESS");
+    SuperPoolFactory poolFactory = SuperPoolFactory(poolFactoryAddress);
     // get private key from env file
     uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     vm.startBroadcast(deployerPrivateKey);
     poolStrategyLogic = new PoolStrategyV1();
 
-    ISuperPoolFactory(address(poolFactoryLogic)).createSuperPool(
+    ISuperPoolFactory(address(poolFactory)).createSuperPool(
       DataTypes.CreatePoolInput(address(superToken), address(poolStrategyLogic), token, aavePool, aUSDC, aaveUSDC)
     );
 

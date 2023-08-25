@@ -53,7 +53,7 @@ contract SuperPoolFactory is ISuperPoolFactory {
     // initializer Pool
     DataTypes.PoolInitializer memory poolInit;
     poolInit = DataTypes.PoolInitializer({
-      name: string(abi.encodePacked("Super Pool ", token.name())),
+      name: "USDC Aave Lending",
       symbol: string(abi.encodePacked("sp", token.symbol())),
       host: host,
       superToken: superToken,

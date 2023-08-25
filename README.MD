@@ -55,24 +55,27 @@ To deploy, you can simply run the following command:
 
 source .env
 
-# To deploy and verify our contract
+# To deploy and verify our contract:
 forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast --verify -vvvv
+
+# To deploy a super pool using a factory and the deployed strategy :
+forge script script/DeployPoolWithStrategy.s.sol:CreatePoolScript --rpc-url $RPC_URL --broadcast --verify -vvvv
 ```
 
-The steps are: 
+The steps are:
 - deploy logic contracts for the pool, pool internal and pool strategy contracts
 - deploy the super pool factory
 - create a super pool using the factory
 
 ###  Super Pool Factory
 
-The contract is responsible for creating the pools, it creates proxies of the pool and pool internal implementation and initializes them. 
+The contract is responsible for creating the pools, it creates proxies of the pool and pool internal implementation and initializes them.
 
 It creates a pool per superToken and pool strategy (aave, compound….)
 
 ### Pool
 
-Main user interaction (send tokens (IERC77 receive), stream, withdraw, out stream) implements is an ERC20 and SuperApp implementing callbacks. 
+Main user interaction (send tokens (IERC77 receive), stream, withdraw, out stream) implements is an ERC20 and SuperApp implementing callbacks.
 
 The pool contract is like an API that interact with the user and redirect the calls to the backend (the pool Internal contract)
 
@@ -101,7 +104,7 @@ For every pool interaction, a new pool object will be created with the relevant 
 
 ```tsx
 struct PoolV1 {
-        uint256 id; 
+        uint256 id;
         uint256 timestamp;
         uint256 nrSuppliers; //Supplies already interacting with the pool
 
@@ -110,12 +113,12 @@ struct PoolV1 {
 
         int96 inFlowRate; // stream in flow
         int96 outFlowRate; //supplier receiving flow
-        uint256 outFlowBuffer; 
+        uint256 outFlowBuffer;
 				// minimal balance in the pool for covering out streams
 
         uint256 yieldTokenIndex; // Indexes ot calculate user accrued yield
         uint256 yieldInFlowRateIndex; // Indexes ot calculate user accrued yield
-			
+
         uint256 yieldAccrued; // Yield accrued since the last updated
         uint256 yieldSnapshot; // Total balance in the pool strategy
         uint256 totalYield; // total yield accrued by the pool
@@ -134,7 +137,7 @@ struct Supplier {
         address supplier;
         uint256 cumulatedYield;
         uint256 deposit;
-        uint256 timestamp; 
+        uint256 timestamp;
         uint256 createdTimestamp;
         uint256 eventId;
         Stream inStream;
@@ -177,7 +180,7 @@ struct Stream {
 
 ## Super Pool Factory initialization parameters
 
-**Network** 
+**Network**
 
 - Superfluid Host
 - Supertoken
@@ -197,7 +200,7 @@ We allocate the yield depending on the dollar-seconds to be able to have a commo
 
 In every pool update, we will calculate the area associated with the stream or the deposit in dollars/seconds and then simply proportionally split the yield.
 
-We will keep track of two indexes. 
+We will keep track of two indexes.
 
 - The yield earned by token:  yieldTokenIndex.
 - The yield earned by the incoming flow-rate:  yieldInFlowRateIndex.
@@ -207,10 +210,10 @@ The calculation of the yield accrued is pretty straightforward, deposit and stre
 In doing so we can linearize the calculation of the yield earned by each supplier
 
 ```jsx
-uint256 yieldShare = 
+uint256 yieldShare =
 //// deposit part
  ( yieldTokenIndex(block.timestamp) - yieldTokenIndex(depositTimeStamp)) * deposit
- 
+
 //// streaming part Inflow
 +  (  yieldInFlowRateIndex(block.timestamp)
    - yieldInFlowRateIndex(startStreamTimeStamp)) * inFlowRate
@@ -224,7 +227,7 @@ We define “PoolEvent” as any event which changes the “Current Pool State�
 
 Type of PoolEvents:
 
-**User Interaction (see code)** 
+**User Interaction (see code)**
 
 - Deposit Supertoken (ERC777 send)
 - Stream-In Start Supertoken
@@ -249,7 +252,7 @@ period(0) {
 					flowRate:5
 					depositFromInFlowRate:0
 					yieldTokenIndex: 0
-					yieldInFlowRateIndex: 0		
+					yieldInFlowRateIndex: 0
 					timestamp:0
 					}
 ```
@@ -258,13 +261,13 @@ period(0) {
 
 **t0 init  :**
 
- **-** start stream 5 tokens/s 
+ **-** start stream 5 tokens/s
 
  - deposit 20 tokens
 
  - yield 1 token/second
 
-**t1 increase yield revenue to 2token/s:** 
+**t1 increase yield revenue to 2token/s:**
 
 First we have to update both indexes, to do that we are going to calculate the total dollar second and the allocation to the stream portion and to the deposit portion:
 
@@ -284,7 +287,7 @@ period(1) {
 					flowRate:5
 					depositFromFlowRate:50
 					yieldTokenIndex: 0.22
-					yieldFlowRateIndex: 1.11	
+					yieldFlowRateIndex: 1.11
 					timestamp:10
 					}
 ```
@@ -315,11 +318,11 @@ supplier = {
 Yield Calculated at t2
 
 ```tsx
-yield = (yieldTokenIndex(t2)-yieldTokenIndex(to))*deposit 
+yield = (yieldTokenIndex(t2)-yieldTokenIndex(to))*deposit
 + (yieldFlowRateIndex(t2)-yieldFlowRateIndex(to)*flowrate
 + cumulatedYield;
 
-balance = deposit + flowRate*(t2-to) + yield 
+balance = deposit + flowRate*(t2-to) + yield
 ```
 
 Notice that the deposit and the flowrate have different timestamps as a user can do a deposit and a later point of time start a stream
