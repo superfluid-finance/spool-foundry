@@ -284,7 +284,7 @@ contract PoolV1 is PoolStateV1, Initializable, UUPSProxiable, SuperAppBase, IERC
     }
     return newCtx;
   }
-  
+
 
   function _updateStreamRecord(bytes memory newCtx, int96 inFlowRate, address sender) internal returns (bytes memory updateCtx) {
     bytes memory data = delegateCallPoolInternal(abi.encodeWithSignature("_updateSupplierFlow(address,int96,int96,bytes)", sender, inFlowRate, 0, newCtx));
