@@ -91,7 +91,7 @@ contract PoolStrategyV1 is Initializable, UUPSProxiable, IPoolStrategyV1 {
     // We are not actually using the streamed in SuperToken's for
     // the Aave pool, so we mint fake tokens to simulate the
     // streamed in tokens
-    aaveToken.mint(formattedAmountToDeposit);
+    aaveToken.mint(address(this), formattedAmountToDeposit);
 
     if (formattedAmountToDeposit > 0) {
       aavePool.deposit(address(aaveToken), formattedAmountToDeposit, address(this), 0);
